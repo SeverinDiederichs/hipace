@@ -94,16 +94,6 @@ AdvancePlasmaParticles (PlasmaParticleContainer& plasma, Fields & fields,
         amrex::Real * const Fux3 = soa.GetRealData(PlasmaIdx::Fux3).data();
         amrex::Real * const Fuy3 = soa.GetRealData(PlasmaIdx::Fuy3).data();
         amrex::Real * const Fpsi3 = soa.GetRealData(PlasmaIdx::Fpsi3).data();
-        amrex::Real * const Fx4 = soa.GetRealData(PlasmaIdx::Fx4).data();
-        amrex::Real * const Fy4 = soa.GetRealData(PlasmaIdx::Fy4).data();
-        amrex::Real * const Fux4 = soa.GetRealData(PlasmaIdx::Fux4).data();
-        amrex::Real * const Fuy4 = soa.GetRealData(PlasmaIdx::Fuy4).data();
-        amrex::Real * const Fpsi4 = soa.GetRealData(PlasmaIdx::Fpsi4).data();
-        amrex::Real * const Fx5 = soa.GetRealData(PlasmaIdx::Fx5).data();
-        amrex::Real * const Fy5 = soa.GetRealData(PlasmaIdx::Fy5).data();
-        amrex::Real * const Fux5 = soa.GetRealData(PlasmaIdx::Fux5).data();
-        amrex::Real * const Fuy5 = soa.GetRealData(PlasmaIdx::Fuy5).data();
-        amrex::Real * const Fpsi5 = soa.GetRealData(PlasmaIdx::Fpsi5).data();
 
         const int depos_order_xy = Hipace::m_depos_order_xy;
         const amrex::Real clightsq = 1.0_rt/(phys_const.c*phys_const.c);
@@ -126,9 +116,7 @@ AdvancePlasmaParticles (PlasmaParticleContainer& plasma, Fields & fields,
                 {
                     ShiftForceTerms(Fx1[ip], Fy1[ip], Fux1[ip], Fuy1[ip], Fpsi1[ip],
                                     Fx2[ip], Fy2[ip], Fux2[ip], Fuy2[ip], Fpsi2[ip],
-                                    Fx3[ip], Fy3[ip], Fux3[ip], Fuy3[ip], Fpsi3[ip],
-                                    Fx4[ip], Fy4[ip], Fux4[ip], Fuy4[ip], Fpsi4[ip],
-                                    Fx5[ip], Fy5[ip], Fux5[ip], Fuy5[ip], Fpsi5[ip] );
+                                    Fx3[ip], Fy3[ip], Fux3[ip], Fuy3[ip], Fpsi3[ip]);
                 }
 
                 if (do_update)
@@ -153,8 +141,6 @@ AdvancePlasmaParticles (PlasmaParticleContainer& plasma, Fields & fields,
                                        Fx1[ip], Fy1[ip], Fux1[ip], Fuy1[ip], Fpsi1[ip],
                                        Fx2[ip], Fy2[ip], Fux2[ip], Fuy2[ip], Fpsi2[ip],
                                        Fx3[ip], Fy3[ip], Fux3[ip], Fuy3[ip], Fpsi3[ip],
-                                       Fx4[ip], Fy4[ip], Fux4[ip], Fuy4[ip], Fpsi4[ip],
-                                       Fx5[ip], Fy5[ip], Fux5[ip], Fuy5[ip], Fpsi5[ip],
                                        dz, temp_slice, ip, SetPosition );
                 }
           }
@@ -196,16 +182,6 @@ ResetPlasmaParticles (PlasmaParticleContainer& plasma, int const lev, const bool
         amrex::Real * const Fux3 = soa.GetRealData(PlasmaIdx::Fux3).data();
         amrex::Real * const Fuy3 = soa.GetRealData(PlasmaIdx::Fuy3).data();
         amrex::Real * const Fpsi3 = soa.GetRealData(PlasmaIdx::Fpsi3).data();
-        amrex::Real * const Fx4 = soa.GetRealData(PlasmaIdx::Fx4).data();
-        amrex::Real * const Fy4 = soa.GetRealData(PlasmaIdx::Fy4).data();
-        amrex::Real * const Fux4 = soa.GetRealData(PlasmaIdx::Fux4).data();
-        amrex::Real * const Fuy4 = soa.GetRealData(PlasmaIdx::Fuy4).data();
-        amrex::Real * const Fpsi4 = soa.GetRealData(PlasmaIdx::Fpsi4).data();
-        amrex::Real * const Fx5 = soa.GetRealData(PlasmaIdx::Fx5).data();
-        amrex::Real * const Fy5 = soa.GetRealData(PlasmaIdx::Fy5).data();
-        amrex::Real * const Fux5 = soa.GetRealData(PlasmaIdx::Fux5).data();
-        amrex::Real * const Fuy5 = soa.GetRealData(PlasmaIdx::Fuy5).data();
-        amrex::Real * const Fpsi5 = soa.GetRealData(PlasmaIdx::Fpsi5).data();
         amrex::Real * const x0 = soa.GetRealData(PlasmaIdx::x0).data();
         amrex::Real * const y0 = soa.GetRealData(PlasmaIdx::y0).data();
 
@@ -244,16 +220,6 @@ ResetPlasmaParticles (PlasmaParticleContainer& plasma, int const lev, const bool
                     Fux3[ip] = 0._rt;
                     Fuy3[ip] = 0._rt;
                     Fpsi3[ip] = 0._rt;
-                    Fx4[ip] = 0._rt;
-                    Fy4[ip] = 0._rt;
-                    Fux4[ip] = 0._rt;
-                    Fuy4[ip] = 0._rt;
-                    Fpsi4[ip] = 0._rt;
-                    Fx5[ip] = 0._rt;
-                    Fy5[ip] = 0._rt;
-                    Fux5[ip] = 0._rt;
-                    Fuy5[ip] = 0._rt;
-                    Fpsi5[ip] = 0._rt;
                 }
         }
         );

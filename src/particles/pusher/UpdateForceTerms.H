@@ -80,16 +80,6 @@ void UpdateForceTerms(const amrex::ParticleReal& uxp,
  * \param[in,out] Fux3 force term acting on x momentum of the particle
  * \param[in,out] Fuy3 force term acting on y momentum of the particle
  * \param[in,out] Fpsi3 force term acting on the plasma pseudo-potential of the particle
- * \param[in,out] Fx4 force term acting on x position of the particle
- * \param[in,out] Fy4 force term acting on y position of the particle
- * \param[in,out] Fux4 force term acting on x momentum of the particle
- * \param[in,out] Fuy4 force term acting on y momentum of the particle
- * \param[in,out] Fpsi4 force term acting on the plasma pseudo-potential of the particle
- * \param[in,out] Fx5 force term acting on x position of the particle
- * \param[in,out] Fy5 force term acting on y position of the particle
- * \param[in,out] Fux5 force term acting on x momentum of the particle
- * \param[in,out] Fuy5 force term acting on y momentum of the particle
- * \param[in,out] Fpsi5 force term acting on the plasma pseudo-potential of the particle
   */
 AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
 void ShiftForceTerms (const amrex::ParticleReal& Fx1,
@@ -106,31 +96,9 @@ void ShiftForceTerms (const amrex::ParticleReal& Fx1,
                       amrex::ParticleReal& Fy3,
                       amrex::ParticleReal& Fux3,
                       amrex::ParticleReal& Fuy3,
-                      amrex::ParticleReal& Fpsi3,
-                      amrex::ParticleReal& Fx4,
-                      amrex::ParticleReal& Fy4,
-                      amrex::ParticleReal& Fux4,
-                      amrex::ParticleReal& Fuy4,
-                      amrex::ParticleReal& Fpsi4,
-                      amrex::ParticleReal& Fx5,
-                      amrex::ParticleReal& Fy5,
-                      amrex::ParticleReal& Fux5,
-                      amrex::ParticleReal& Fuy5,
-                      amrex::ParticleReal& Fpsi5 )
+                      amrex::ParticleReal& Fpsi3 )
 
 {
-
-    Fx5 = Fx4;
-    Fy5 = Fy4;
-    Fux5 = Fux4;
-    Fuy5 = Fuy4;
-    Fpsi5 = Fpsi4;
-
-    Fx4 = Fx3;
-    Fy4 = Fy3;
-    Fux4 = Fux3;
-    Fuy4 = Fuy3;
-    Fpsi4 = Fpsi3;
 
     Fx3 = Fx2;
     Fy3 = Fy2;

@@ -588,11 +588,11 @@ Hipace::WriteDiagnostics (int output_step, bool force_output)
         amrex::Vector<std::string> real_names {
             "w","ux","uy", "psi",
             "x_prev", "y_prev", "w_temp", "ux_temp", "uy_temp", "psi_temp",
-            "Fx1", "Fx2", "Fx3", "Fx4", "Fx5",
-            "Fy1", "Fy2", "Fy3", "Fy4", "Fy5",
-            "Fux1", "Fux2", "Fux3", "Fux4", "Fux5",
-            "Fuy1", "Fuy2", "Fuy3", "Fuy4", "Fuy5",
-            "Fpsi1", "Fpsi2", "Fpsi3", "Fpsi4", "Fpsi5",
+            "Fx1", "Fx2", "Fx3",
+            "Fy1", "Fy2", "Fy3",
+            "Fux1", "Fux2", "Fux3",
+            "Fuy1", "Fuy2", "Fuy3",
+            "Fpsi1", "Fpsi2", "Fpsi3",
             "x0", "y0"
         };
         AMREX_ALWAYS_ASSERT(real_names.size() == PlasmaIdx::nattribs);
