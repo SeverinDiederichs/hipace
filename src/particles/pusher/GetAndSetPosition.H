@@ -1,4 +1,4 @@
-/* Copyright 2019 David Grote, Maxence Thevenet, Remi Lehe
+OA/* Copyright 2019 David Grote, Maxence Thevenet, Remi Lehe
  * Weiqun Zhang
  *
  * This file is part of WarpX.
@@ -19,10 +19,13 @@
 /** \brief Functor that can be used to extract the positions of the macroparticles
  *         inside a ParallelFor kernel
  */
+template <typedef T_PC>
 struct GetParticlePosition
 {
-    using PType = PlasmaParticleContainer::ParticleType;
+    using PType = T_PC::ParticleType;
     using RType = amrex::ParticleReal;
+
+    using ParIter = T_PC::IteratorType; // Look at how ParticleType is handled in amrex::ParticleContainer
 
     const PType* AMREX_RESTRICT m_structs;
 
@@ -33,7 +36,7 @@ struct GetParticlePosition
      * \param a_pti iterator to the tile containing the macroparticles
      * \param a_offset offset to apply to the particle indices
      */
-    GetParticlePosition (const PlasmaParticleIterator& a_pti, int a_offset = 0) noexcept
+    GetParticlePosition (const ParIter& a_pti, int a_offset = 0) noexcept
     {
         const auto& aos = a_pti.GetArrayOfStructs();
         m_structs = aos().dataPtr() + a_offset;
