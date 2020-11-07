@@ -37,11 +37,11 @@ InitBeam (const IntVect& a_num_particles_per_cell,
         const auto lo = amrex::lbound(tile_box);
         const auto hi = amrex::ubound(tile_box);
 
-        Gpu::ManagedVector<unsigned int> counts(tile_box.numPts(), 0);
-        unsigned int* pcount = counts.dataPtr();
+        Gpu::ManagedVector<unsigned long long> counts(tile_box.numPts(), 0);
+        unsigned long long* pcount = counts.dataPtr();
 
-        Gpu::ManagedVector<unsigned int> offsets(tile_box.numPts());
-        unsigned int* poffset = offsets.dataPtr();
+        Gpu::ManagedVector<unsigned long long> offsets(tile_box.numPts());
+        unsigned long long* poffset = offsets.dataPtr();
 
         amrex::ParallelFor(tile_box,
         [=] AMREX_GPU_DEVICE (int i, int j, int k) noexcept
