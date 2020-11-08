@@ -19,17 +19,29 @@ InitParticles (const IntVect& a_num_particles_per_cell,
     HIPACE_PROFILE("PlasmaParticleContainer::InitParticles");
 
     const int lev = 0;
-    const auto dx = a_geom.CellSizeArray();
+
+    amrex::IntVect cr {8,8,1};
+    AMREX_ALWAYS_ASSERT(cr[AMREX_SPACEDIM-1] == 1);
+    auto dx = a_geom.CellSizeArray();
+    for (int i=0; i<AMREX_SPACEDIM; i++) dx[i] *= cr[i];
+
     const auto plo = a_geom.ProbLoArray();
 
-    const int num_ppc = AMREX_D_TERM( a_num_particles_per_cell[0],
-                                      *a_num_particles_per_cell[1],
-                                      *a_num_particles_per_cell[2]);
-    const Real scale_fac = Hipace::m_normalized_units? 1./num_ppc : dx[0]*dx[1]*dx[2]/num_ppc;
+    amrex::IntVect ppc_cr = a_num_particles_per_cell;
+    for (int i=0; i<AMREX_SPACEDIM; i++) ppc_cr[i] *= cr[i];
+
+    const int num_ppc = AMREX_D_TERM( ppc_cr[0],
+                                       *ppc_cr[1],
+                                       *ppc_cr[2]);
+
+     const Real scale_fac = Hipace::m_normalized_units ?
+         1._rt/num_ppc*cr[0]*cr[1]*cr[2] :
+         dx[0]*dx[1]*dx[2]/num_ppc;
 
     for(MFIter mfi = MakeMFIter(lev); mfi.isValid(); ++mfi)
     {
-        const Box& tile_box  = mfi.tilebox();
+        Box tile_box  = mfi.tilebox();
+        tile_box.coarsen(cr);
 
         const auto lo = amrex::lbound(tile_box);
         const auto hi = amrex::ubound(tile_box);
@@ -47,7 +59,7 @@ InitParticles (const IntVect& a_num_particles_per_cell,
             {
                 Real r[3];
 
-                ParticleUtil::get_position_unit_cell(r, a_num_particles_per_cell, i_part);
+                ParticleUtil::get_position_unit_cell(r, ppc_cr, i_part);
 
                 Real x = plo[0] + (i + r[0])*dx[0];
                 Real y = plo[1] + (j + r[1])*dx[1];
@@ -115,7 +127,7 @@ InitParticles (const IntVect& a_num_particles_per_cell,
             {
                 Real r[3] = {0.,0.,0.};
 
-                ParticleUtil::get_position_unit_cell(r, a_num_particles_per_cell, i_part);
+                ParticleUtil::get_position_unit_cell(r, ppc_cr, i_part);
 
                 Real x = plo[0] + (i + r[0])*dx[0];
                 Real y = plo[1] + (j + r[1])*dx[1];
