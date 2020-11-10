@@ -187,6 +187,9 @@ public:
     static bool m_slice_F_xz;
     /** Whether to dump plasma particles */
     static bool m_output_plasma;
+    /** How much the box is coarsened for beam injection, to avoid exceeding max int in cell count.
+     * Otherwise, changing this parameter only will not affect the simulation results. */
+    static int m_beam_injection_cr;
 
 private:
     /** Pointer to current (and only) instance of class Hipace */
