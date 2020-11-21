@@ -17,7 +17,6 @@ namespace AnyDST
      */
     void ExpandR2R (amrex::FArrayBox& dst, amrex::FArrayBox& src)
     {
-        HIPACE_PROFILE("AnyDST::ExpandR2R()");
         constexpr int scomp = 0;
         constexpr int dcomp = 0;
 
@@ -50,7 +49,6 @@ namespace AnyDST
      */
     void ShrinkC2R (amrex::FArrayBox& dst, amrex::BaseFab<amrex::GpuComplex<amrex::Real>>& src)
     {
-        HIPACE_PROFILE("AnyDST::ShrinkC2R()");
         constexpr int scomp = 0;
         constexpr int dcomp = 0;
 
@@ -118,10 +116,15 @@ namespace AnyDST
 
     void Execute (DSTplan& dst_plan){
         HIPACE_PROFILE("AnyDST::Execute()");
-
+        HIPACE_PROFILE_VAR("AnyDST::ExpandR2R()", expand);
+        amrex::Gpu::synchronize();
+        HIPACE_PROFILE_VAR_START(expand);
         // Expand in position space m_position_array -> m_expanded_position_array
         ExpandR2R(*dst_plan.m_expanded_position_array, *dst_plan.m_position_array);
-
+        amrex::Gpu::synchronize();
+        HIPACE_PROFILE_VAR_STOP(expand);
+        HIPACE_PROFILE_VAR("AnyDST::cuFFTExecR2C()", cufft);
+        HIPACE_PROFILE_VAR_START(cufft);
         cudaStream_t stream = amrex::Gpu::Device::cudaStream();
         cufftSetStream ( dst_plan.m_plan, stream);
         cufftResult result;
@@ -136,8 +139,14 @@ namespace AnyDST
             dst_plan.m_plan, dst_plan.m_expanded_position_array->dataPtr(),
             reinterpret_cast<AnyFFT::Complex*>(dst_plan.m_expanded_fourier_array->dataPtr()));
 #endif
+        amrex::Gpu::synchronize();
+        HIPACE_PROFILE_VAR_STOP(cufft);
+        HIPACE_PROFILE_VAR("AnyDST::ShrinkC2R()", shrink);
+        HIPACE_PROFILE_VAR_START(shrink);
         // Shrink in Fourier space m_expanded_fourier_array -> m_fourier_array
         ShrinkC2R(*dst_plan.m_fourier_array, *dst_plan.m_expanded_fourier_array);
+        amrex::Gpu::synchronize();
+        HIPACE_PROFILE_VAR_STOP(shrink);
 
         if ( result != CUFFT_SUCCESS ) {
             amrex::Print() << " forward transform using cufftExec failed ! Error: " <<
