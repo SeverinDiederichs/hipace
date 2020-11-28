@@ -103,6 +103,8 @@ AdaptiveTimeStep::Calculate (amrex::Real& dt, const int nt, BeamParticleContaine
          m_timestep_data[WhichDouble::SumWeightsTimesUzSquared] = recv_buffer[WhichDouble::SumWeightsTimesUzSquared];
          m_timestep_data[WhichDouble::MinUz] = recv_buffer[WhichDouble::MinUz];
          dt = recv_buffer[WhichDouble::Dt];
+
+         std::cout<<"Rank " << my_rank_z << " received new timestep " << dt << "\n";
          amrex::The_Pinned_Arena()->free(recv_buffer);
     }
 

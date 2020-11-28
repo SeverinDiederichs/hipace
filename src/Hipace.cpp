@@ -285,7 +285,6 @@ Hipace::Evolve ()
         ResetAllQuantities(lev);
         // std::cout<<"rank "<< rank <<" Entering calculate time step info\n";
         m_adaptive_time_step.Calculate(m_dt, step, m_beam_container, m_plasma_container, lev, m_comm_z);
-        // std::cout<<"rank "<< m_rank_z <<" leave calculate time step info\n";
 
         Wait();
 

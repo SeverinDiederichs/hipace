@@ -154,7 +154,7 @@ AdvanceBeamParticlesSlice (BeamParticleContainer& beam, Fields& fields,
                 setPosition(ip, xp, yp, zp);
                 uxp[ip] = ux_next;
                 uyp[ip] = uy_next;
-                uzp[ip] = uz_next;
+                uzp[ip] = uz_next-5._rt;
 
           }
           );
