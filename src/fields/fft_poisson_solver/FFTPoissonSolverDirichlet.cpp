@@ -51,8 +51,8 @@ FFTPoissonSolverDirichlet::define ( amrex::BoxArray const& realspace_ba,
     const auto dx = gm.CellSizeArray();
     const amrex::Real dxsquared = dx[0]*dx[0];
     const amrex::Real dysquared = dx[1]*dx[1];
-    const amrex::Real sine_x_factor = MathConst::pi / ( 2. * ( gm.Domain().length(0) + 1 ));
-    const amrex::Real sine_y_factor = MathConst::pi / ( 2. * ( gm.Domain().length(1) + 1 ));
+    const amrex::Real sine_x_factor = MathConst::pi / ( 2. * ( gm.Domain().length(0)  ));
+    const amrex::Real sine_y_factor = MathConst::pi / ( 2. * ( gm.Domain().length(1)  ));
 
     // Normalization of FFTW's 'DST-I' discrete sine transform (FFTW_RODFT00)
     // This normalization is used regardless of the sine transform library
@@ -92,10 +92,10 @@ FFTPoissonSolverDirichlet::define ( amrex::BoxArray const& realspace_ba,
         // the FFT plan, the valid dimensions are those of the real-space box.
         amrex::IntVect fft_size = mfi.validbox().length();
         m_forward_plan[mfi] = AnyDST::CreatePlan(
-            fft_size, &m_stagingArea[mfi], &m_tmpSpectralField[mfi]);
+            fft_size, &m_stagingArea[mfi], &m_tmpSpectralField[mfi], 1);
 
         m_backward_plan[mfi] = AnyDST::CreatePlan(
-            fft_size, &m_tmpSpectralField[mfi], &m_stagingArea[mfi]);
+            fft_size, &m_tmpSpectralField[mfi], &m_stagingArea[mfi], 0);
     }
 }
 

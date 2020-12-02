@@ -10,7 +10,7 @@ namespace AnyDST
 #endif
 
     DSTplan CreatePlan (const amrex::IntVect& real_size, amrex::FArrayBox* position_array,
-                        amrex::FArrayBox* fourier_array)
+                        amrex::FArrayBox* fourier_array,const int dir)
     {
         DSTplan dst_plan;
         const int nx = real_size[0];
@@ -18,9 +18,16 @@ namespace AnyDST
 
         // Initialize fft_plan.m_plan with the vendor fft plan.
         // Swap dimensions: AMReX FAB are Fortran-order but FFTW is C-order
-        dst_plan.m_plan = VendorCreatePlanR2R2D(
-            ny, nx, position_array->dataPtr(), fourier_array->dataPtr(),
-            FFTW_RODFT00, FFTW_RODFT00, FFTW_ESTIMATE);
+        if (dir == 1){
+            dst_plan.m_plan = VendorCreatePlanR2R2D(
+                ny, nx, position_array->dataPtr(), fourier_array->dataPtr(),
+                FFTW_RODFT10, FFTW_RODFT10, FFTW_ESTIMATE);
+        } else if (dir == 0){
+            dst_plan.m_plan = VendorCreatePlanR2R2D(
+                ny, nx, position_array->dataPtr(), fourier_array->dataPtr(),
+                FFTW_RODFT01, FFTW_RODFT01, FFTW_ESTIMATE);
+        }
+
 
         // Store meta-data in fft_plan
         dst_plan.m_position_array = position_array;

@@ -38,7 +38,7 @@ namespace AnyDST
      * \param[out] fourier_array Real array to/from where R2R DST is performed
      */
     DSTplan CreatePlan (const amrex::IntVect& real_size, amrex::FArrayBox* position_array,
-                        amrex::FArrayBox* fourier_array);
+                        amrex::FArrayBox* fourier_array, const int dir);
 
     /** \brief Destroy library FFT plan.
      * \param[out] dst_plan plan to destroy
