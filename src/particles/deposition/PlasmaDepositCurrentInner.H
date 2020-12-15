@@ -102,9 +102,9 @@ void doDepositionShapeN (const PlasmaParticleIterator& pti,
         "jx, jy, jz, and rho must be nodal in all directions."
         );
 
-    int n_qsa_violation = 0;
-    amrex::Gpu::DeviceScalar<int> gpu_n_qsa_violation(n_qsa_violation);
-    int* p_n_qsa_violation = gpu_n_qsa_violation.dataPtr();
+    amrex::Real n_qsa_violation = 0._rt;
+    amrex::Gpu::DeviceScalar<amrex::Real> gpu_n_qsa_violation(n_qsa_violation);
+    amrex::Real* p_n_qsa_violation = gpu_n_qsa_violation.dataPtr();
 
     // Loop over particles and deposit into jx_fab, jy_fab, jz_fab, and rho_fab
     amrex::ParallelFor(
@@ -119,12 +119,12 @@ void doDepositionShapeN (const PlasmaParticleIterator& pti,
                                                                   + uxp[ip]*uxp[ip]*clightsq
                                                                   + uyp[ip]*uyp[ip]*clightsq
                                                                   + (psi+1.0_rt)*(psi+1.0_rt));
-
+            amrex::Gpu::Atomic::Add(p_n_qsa_violation,wp[ip] );
             if (( 1.0_rt/(gaminv*(psi+1.0_rt)) < 0.0_rt) ||
                  ( 1.0_rt/(gaminv*(psi+1.0_rt)) > max_qsa_weighting_factor))
             {
                  // This particle violates the QSA, discard it and do not deposit its current
-                 amrex::Gpu::Atomic::Add(p_n_qsa_violation, 1);
+                 // amrex::Gpu::Atomic::Add(p_n_qsa_violation, 1);
                  wp[ip] = 0.0_rt;
                  return;
             }
@@ -180,8 +180,8 @@ void doDepositionShapeN (const PlasmaParticleIterator& pti,
         }
         );
         n_qsa_violation = gpu_n_qsa_violation.dataValue();
-        if (n_qsa_violation > 0 && (Hipace::m_verbose >= 3))
-            amrex::Print()<< "number of QSA violating particles on this slice: " \
+        if ((Hipace::m_verbose >= 3))
+            amrex::Print()<< "sum of all weights of the particles on this slice: " \
             << n_qsa_violation << "\n";
 }
 
