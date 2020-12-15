@@ -17,7 +17,7 @@ Fields::Fields (Hipace const* a_hipace)
 void
 Fields::AllocData (
     int lev, const amrex::BoxArray& ba, const amrex::DistributionMapping& dm,
-    amrex::Geometry const& geom, const amrex::BoxArray& slice_ba, const amrex::DistributionMapping& slice_dm)
+    amrex::Geometry const& geom, const amrex::BoxArray& slice_ba, const amrex::DistributionMapping& slice_dm, const MPI_Comm& comm_xy)
 {
     HIPACE_PROFILE("Fields::AllocData()");
     // Need at least 1 guard cell transversally for transverse derivative
@@ -55,6 +55,8 @@ Fields::AllocData (
                         amrex::MFInfo().SetArena(amrex::The_Arena()));
     }
 
+    amrex::ParallelContext::push(comm_xy);
+
     for (int islice=0; islice<(int) WhichSlice::N; islice++) {
         m_slices[lev][islice].define(slice_ba, slice_dm, FieldComps::nfields, m_slices_nguards,
                                      amrex::MFInfo().SetArena(amrex::The_Arena()));
@@ -75,6 +77,7 @@ Fields::AllocData (
                                          getSlices(lev, WhichSlice::This).DistributionMap(),
                                          geom));
     }
+    amrex::ParallelContext::pop();
 }
 
 void
@@ -237,7 +240,7 @@ Fields::AddRhoIons (const int lev)
 }
 
 void
-Fields::SolvePoissonExmByAndEypBx (amrex::Geometry const& geom, const MPI_Comm& m_comm_xy,
+Fields::SolvePoissonExmByAndEypBx (amrex::Geometry const& geom, const MPI_Comm& comm_xy,
                                    const int lev)
 {
     /* Solves Laplacian(-Psi) =  1/episilon0 * (rho-Jz/c) and
@@ -262,7 +265,7 @@ Fields::SolvePoissonExmByAndEypBx (amrex::Geometry const& geom, const MPI_Comm& 
     m_poisson_solver->SolvePoissonEquation(lhs);
 
     /* ---------- Transverse FillBoundary Psi ---------- */
-    amrex::ParallelContext::push(m_comm_xy);
+    amrex::ParallelContext::push(comm_xy);
     lhs.FillBoundary(geom.periodicity());
     amrex::ParallelContext::pop();
 

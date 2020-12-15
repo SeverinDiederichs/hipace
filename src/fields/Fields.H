@@ -58,7 +58,7 @@ public:
     void AllocData (
         int lev, const amrex::BoxArray& ba, const amrex::DistributionMapping& dm,
         amrex::Geometry const& geom, const amrex::BoxArray& slice_ba,
-        const amrex::DistributionMapping& slice_dm);
+        const amrex::DistributionMapping& slice_dm, const MPI_Comm& comm_xy);
 
     /** Class to handle transverse FFT Poisson solver on 1 slice */
     std::unique_ptr<FFTPoissonSolver> m_poisson_solver;
