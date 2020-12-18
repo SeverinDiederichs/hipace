@@ -807,10 +807,26 @@ Hipace::WriteDiagnostics (int output_step, bool force_output)
         //                      "Bx"               ""  (just for now)
         io::Mesh field = meshes[fieldname];
         io::MeshRecordComponent field_comp = field[io::MeshRecordComponent::SCALAR];
+
+        // meta-data
         field.setDataOrder(io::Mesh::DataOrder::C);
-        field.setAxisLabels({"z", "y", "x"});
-        field.setGridSpacing(utils::getReversedVec(geom_io[lev].CellSize())); // dx, dy, dz
-        field.setGridGlobalOffset(utils::getReversedVec(geom_io[lev].ProbLo()));  // begin of moving window
+        if (m_slice_F_xz) {
+            field.setAxisLabels({"z", "x"});
+            auto dCells = utils::getReversedVec(geom_io[lev].CellSize()); // dx, dy, dz
+            dCells.erase(dCells.begin() + 1); // remove dy
+            field.setGridSpacing(dCells);             // dx, dz
+            auto offWindow = utils::getReversedVec(geom_io[lev].ProbLo());
+            offWindow.erase(offWindow.begin() + 1); // remove offset in y
+            field.setGridGlobalOffset(offWindow);           // start of moving window
+            field_comp.setPosition<double>({0.5, 0.5});     // cell-centered
+        } else
+        {
+            field.setAxisLabels({"z", "y", "x"});
+            field.setGridSpacing(utils::getReversedVec(geom_io[lev].CellSize())); // dx, dy, dz
+            field.setGridGlobalOffset(
+                utils::getReversedVec(geom_io[lev].ProbLo()));   // start of moving window in x and z
+            field_comp.setPosition<double>({0.5, 0.5, 0.5}); // cell-centered
+        }
 
         // data type and global size of the simulation
         io::Datatype datatype = io::determineDatatype< amrex::Real >();
