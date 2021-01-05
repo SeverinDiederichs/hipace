@@ -594,7 +594,6 @@ Hipace::Wait ()
                                             bx, slice_fab4.nComp());
 
         MPI_Status status;
-	amrex::Gpu::Device::synchronize();
 	MPI_Recv(recv_buffer, nreals_total,
                  amrex::ParallelDescriptor::Mpi_typemap<amrex::Real>::type(),
                  m_rank_z+1, comm_z_tag, m_comm_z, &status);
@@ -612,6 +611,7 @@ Hipace::Wait ()
              {
                  slice_fab4(i,j,k,n) = buf4(i,j,k,n);
              });
+	amrex::Gpu::Device::synchronize();
         amrex::The_Pinned_Arena()->free(recv_buffer);
 
         }
@@ -627,7 +627,6 @@ Hipace::Wait ()
 	    auto recv_buffer = (char*)amrex::The_Pinned_Arena()->alloc(buffer_size);
 
             MPI_Status status;
-            amrex::Gpu::Device::synchronize();
 	    MPI_Recv(recv_buffer, buffer_size,
                      amrex::ParallelDescriptor::Mpi_typemap<char>::type(),
                      m_rank_z+1, pcomm_z_tag, m_comm_z, &status);
@@ -650,6 +649,7 @@ Hipace::Wait ()
 	    amrex::Gpu::Device::synchronize();
 	    HIPACE_PROFILE_VAR_STOP(stuff17);
 
+	    amrex::Gpu::Device::synchronize();
             amrex::The_Pinned_Arena()->free(recv_buffer);
 
         }
