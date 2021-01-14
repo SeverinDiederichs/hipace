@@ -16,11 +16,11 @@ struct PlasmaIdx
         x_prev, y_prev,                      // temporary position
         ux_temp, uy_temp,                    // momentum
         psi_temp,                            //
-        Fx1, Fx2, Fx3, Fx4, Fx5,             //
-        Fy1, Fy2, Fy3, Fy4, Fy5,             //
-        Fux1, Fux2, Fux3, Fux4, Fux5,        //
-        Fuy1, Fuy2, Fuy3, Fuy4, Fuy5,        //
-        Fpsi1, Fpsi2, Fpsi3, Fpsi4, Fpsi5,   //
+        Fx1,             //
+        Fy1,             //
+        Fux1,        //
+        Fuy1,        //
+        Fpsi1,   //
         x0, y0,                              // initial positions
         nattribs
     };

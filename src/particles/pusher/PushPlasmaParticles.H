@@ -62,26 +62,6 @@ void PlasmaParticlePush (
     const amrex::ParticleReal& Fux1,
     const amrex::ParticleReal& Fuy1,
     const amrex::ParticleReal& Fpsi1,
-    const amrex::ParticleReal& Fx2,
-    const amrex::ParticleReal& Fy2,
-    const amrex::ParticleReal& Fux2,
-    const amrex::ParticleReal& Fuy2,
-    const amrex::ParticleReal& Fpsi2,
-    const amrex::ParticleReal& Fx3,
-    const amrex::ParticleReal& Fy3,
-    const amrex::ParticleReal& Fux3,
-    const amrex::ParticleReal& Fuy3,
-    const amrex::ParticleReal& Fpsi3,
-    const amrex::ParticleReal& Fx4,
-    const amrex::ParticleReal& Fy4,
-    const amrex::ParticleReal& Fux4,
-    const amrex::ParticleReal& Fuy4,
-    const amrex::ParticleReal& Fpsi4,
-    const amrex::ParticleReal& Fx5,
-    const amrex::ParticleReal& Fy5,
-    const amrex::ParticleReal& Fux5,
-    const amrex::ParticleReal& Fuy5,
-    const amrex::ParticleReal& Fpsi5,
     const amrex::Real dz,
     const bool temp_slice,
     const long ip,
@@ -90,46 +70,31 @@ void PlasmaParticlePush (
 
 {
     using namespace amrex::literals;
-    /* Fifth order adams bashforth coefficients */
-    const amrex::Real a1_times_dz = ( 1901._rt / 720._rt ) * dz;
-    const amrex::Real a2_times_dz = ( -1387._rt / 360._rt ) * dz;
-    const amrex::Real a3_times_dz = ( 109._rt / 30._rt ) * dz;
-    const amrex::Real a4_times_dz = ( -637._rt / 360._rt ) * dz;
-    const amrex::Real a5_times_dz = ( 251._rt / 720._rt ) * dz;
+    /* First order adams bashforth coefficients = Euler's method has no coeffficients */
 
     if (!temp_slice)
     {
-        xp -= a1_times_dz * Fx1 + a2_times_dz * Fx2 + a3_times_dz * Fx3
-            + a4_times_dz * Fx4 + a5_times_dz * Fx5;
-        yp -= a1_times_dz * Fy1 + a2_times_dz * Fy2 + a3_times_dz * Fy3
-            + a4_times_dz * Fy4 + a5_times_dz * Fy5;
+        xp -= dz * Fx1;
+        yp -= dz * Fy1;
 
         SetPosition(ip, xp, yp, zp);
 
         x_prev = xp;
         y_prev = yp;
-        uxp -= a1_times_dz * Fux1 + a2_times_dz * Fux2 + a3_times_dz * Fux3
-            + a4_times_dz * Fux4 + a5_times_dz * Fux5;
-        uyp -= a1_times_dz * Fuy1 + a2_times_dz * Fuy2 + a3_times_dz * Fuy3
-            + a4_times_dz * Fuy4 + a5_times_dz * Fuy5;
-        psip -= a1_times_dz * Fpsi1 + a2_times_dz * Fpsi2 + a3_times_dz * Fpsi3
-            + a4_times_dz * Fpsi4 + a5_times_dz * Fpsi5;
+        uxp -= dz * Fux1;
+        uyp -= dz * Fuy1;
+        psip -= dz * Fpsi1;
     }
     else
     {
-        xp = x_prev - ( a1_times_dz * Fx1 + a2_times_dz * Fx2 + a3_times_dz * Fx3
-                 + a4_times_dz * Fx4 + a5_times_dz * Fx5 );
-        yp = y_prev - ( a1_times_dz * Fy1 + a2_times_dz * Fy2 + a3_times_dz * Fy3
-                 + a4_times_dz * Fy4 + a5_times_dz * Fy5 );
+        xp = x_prev - ( dz * Fx1 );
+        yp = y_prev - ( dz * Fy1 );
 
         SetPosition(ip, xp, yp, zp);
 
-        ux_temp = uxp - ( a1_times_dz * Fux1 + a2_times_dz * Fux2 + a3_times_dz * Fux3
-                  + a4_times_dz * Fux4 + a5_times_dz * Fux5 );
-        uy_temp = uyp - ( a1_times_dz * Fuy1 + a2_times_dz * Fuy2 + a3_times_dz * Fuy3
-                  + a4_times_dz * Fuy4 + a5_times_dz * Fuy5 );
-        psi_temp = psip - ( a1_times_dz * Fpsi1 + a2_times_dz * Fpsi2 + a3_times_dz * Fpsi3
-                  + a4_times_dz * Fpsi4 + a5_times_dz * Fpsi5 );
+        ux_temp = uxp - ( dz * Fux1 );
+        uy_temp = uyp - ( dz * Fuy1 );
+        psi_temp = psip - ( dz * Fpsi1 );
     }
 }
 
