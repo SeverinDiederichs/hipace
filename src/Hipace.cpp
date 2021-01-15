@@ -276,17 +276,17 @@ Hipace::Evolve ()
     const int rank = amrex::ParallelDescriptor::MyProc();
     int const lev = 0;
 #ifdef HIPACE_USE_OPENPMD
-    m_openpmd_writer.InitDiagnostics();
+   // m_openpmd_writer.InitDiagnostics();
 #endif
-    WriteDiagnostics(0);
+//    WriteDiagnostics(0);
     for (int step = 0; step < m_max_step; ++step)
     {
         /* calculate the adaptive time step before printout, so the ranks already print their new dt */
-        m_adaptive_time_step.Calculate(m_dt, step, m_multi_beam, m_plasma_container, lev, m_comm_z);
+//        m_adaptive_time_step.Calculate(m_dt, step, m_multi_beam, m_plasma_container, lev, m_comm_z);
 
         if (m_verbose>=1) std::cout<<"Rank "<<rank<<" started  step "<<step<<" with dt = "<<m_dt<<'\n';
 
-        ResetAllQuantities(lev);
+//        ResetAllQuantities(lev);
 
         Wait();
 
@@ -294,36 +294,36 @@ Hipace::Evolve ()
 
         /* Store charge density of (immobile) ions into WhichSlice::RhoIons */
         if (m_rank_z == m_numprocs_z-1){
-            DepositCurrent(m_plasma_container, m_fields, WhichSlice::RhoIons,
-                           false, false, false, true, geom[lev], lev);
+  //          DepositCurrent(m_plasma_container, m_fields, WhichSlice::RhoIons,
+    //                       false, false, false, true, geom[lev], lev);
         }
 
         // Loop over longitudinal boxes on this rank, from head to tail
-        const amrex::Vector<int> index_array = fields.IndexArray();
-        for (auto it = index_array.rbegin(); it != index_array.rend(); ++it)
-        {
-            const amrex::Box& bx = boxArray(lev)[*it];
-            amrex::Vector<amrex::DenseBins<BeamParticleContainer::ParticleType>> bins;
-            bins = m_multi_beam.findParticlesInEachSlice(lev, *it, bx, geom[lev]);
+    //    const amrex::Vector<int> index_array = fields.IndexArray();
+    //    for (auto it = index_array.rbegin(); it != index_array.rend(); ++it)
+     //   {
+    //        const amrex::Box& bx = boxArray(lev)[*it];
+   //         amrex::Vector<amrex::DenseBins<BeamParticleContainer::ParticleType>> bins;
+      //      bins = m_multi_beam.findParticlesInEachSlice(lev, *it, bx, geom[lev]);
 
-            for (int isl = bx.bigEnd(Direction::z); isl >= bx.smallEnd(Direction::z); --isl){
-                SolveOneSlice(isl, lev, bins);
-            };
-        }
-        if (amrex::ParallelDescriptor::NProcs() == 1) {
-            m_multi_beam.Redistribute();
-        } else {
-            amrex::Print()<<"WARNING: In parallel runs, beam particles are not redistributed. \n";
-        }
+        //    for (int isl = bx.bigEnd(Direction::z); isl >= bx.smallEnd(Direction::z); --isl){
+      //          SolveOneSlice(isl, lev, bins);
+     //       };
+    //    }
+    //    if (amrex::ParallelDescriptor::NProcs() == 1) {
+    //        m_multi_beam.Redistribute();
+     //   } else {
+      //      amrex::Print()<<"WARNING: In parallel runs, beam particles are not redistributed. \n";
+       // }
 
         /* Passing the adaptive time step info */
-        m_adaptive_time_step.PassTimeStepInfo(step, m_comm_z);
+        //m_adaptive_time_step.PassTimeStepInfo(step, m_comm_z);
         // Slices have already been shifted, so send
         // slices {2,3} from upstream to {2,3} in downstream.
         Notify();
 
 #ifdef HIPACE_USE_OPENPMD
-        WriteDiagnostics(step+1);
+     //   WriteDiagnostics(step+1);
 #else
         amrex::Print()<<"WARNING: In parallel runs, only openPMD supports dumping all time steps. \n";
 #endif
@@ -333,9 +333,9 @@ Hipace::Evolve ()
     // the time stored in the output file is the time for the fields. The beam is one time step
     // ahead.
     m_physical_time -= m_dt;
-    WriteDiagnostics(m_max_step, true);
+   // WriteDiagnostics(m_max_step, true);
 #ifdef HIPACE_USE_OPENPMD
-    m_openpmd_writer.reset();
+  //  m_openpmd_writer.reset();
 #endif
 }
 
