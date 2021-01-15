@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from openpmd_viewer import OpenPMDTimeSeries
 
-do_plot = False
+do_plot = True
 
 ts_ref = OpenPMDTimeSeries('./REF_diags/h5/')
 ts = OpenPMDTimeSeries('./diags/h5/')

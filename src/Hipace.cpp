@@ -211,9 +211,12 @@ Hipace::InitData ()
         amrex::Array4<amrex::Real> const& slice_fab3 = slice3.array(box_index);
         amrex::Array4<amrex::Real> const& slice_fab4 = slice4.array(box_index);
         const amrex::Box& bx = slice2.boxArray()[box_index]; // does not include ghost cells
-        const std::size_t nreals_valid_slice2 = bx.numPts()*slice_fab2.nComp();
-        const std::size_t nreals_valid_slice3 = bx.numPts()*slice_fab3.nComp();
-        const std::size_t nreals_valid_slice4 = bx.numPts()*slice_fab4.nComp();
+        constexpr int ncomp2 = 4;
+        constexpr int ncomp3 = 2;
+        constexpr int ncomp4 = 1;
+        const std::size_t nreals_valid_slice2 = bx.numPts()*ncomp2;
+        const std::size_t nreals_valid_slice3 = bx.numPts()*ncomp3;
+        const std::size_t nreals_valid_slice4 = bx.numPts()*ncomp4;
         const std::size_t nreals_total =
             nreals_valid_slice2 + nreals_valid_slice3 + nreals_valid_slice4;
         m_fields_send_buffer = (amrex::Real*)amrex::The_Pinned_Arena()->alloc
@@ -596,35 +599,53 @@ Hipace::Wait ()
         amrex::Array4<amrex::Real> const& slice_fab3 = slice3.array(box_index);
         amrex::Array4<amrex::Real> const& slice_fab4 = slice4.array(box_index);
         const amrex::Box& bx = slice2.boxArray()[box_index]; // does not include ghost cells
-        const std::size_t nreals_valid_slice2 = bx.numPts()*slice_fab2.nComp();
-        const std::size_t nreals_valid_slice3 = bx.numPts()*slice_fab3.nComp();
-        const std::size_t nreals_valid_slice4 = bx.numPts()*slice_fab4.nComp();
+        constexpr int ncomp2 = 4;
+        constexpr int ncomp3 = 2;
+        constexpr int ncomp4 = 1;
+        const std::size_t nreals_valid_slice2 = bx.numPts()*ncomp2;
+        const std::size_t nreals_valid_slice3 = bx.numPts()*ncomp3;
+        const std::size_t nreals_valid_slice4 = bx.numPts()*ncomp4;
         const std::size_t nreals_total =
             nreals_valid_slice2 + nreals_valid_slice3 + nreals_valid_slice4;
-        auto const buf2 = amrex::makeArray4(m_fields_recv_buffer,
-                                            bx, slice_fab2.nComp());
-        auto const buf3 = amrex::makeArray4(m_fields_recv_buffer+nreals_valid_slice2,
-                                            bx, slice_fab3.nComp());
-        auto const buf4 = amrex::makeArray4(m_fields_recv_buffer+nreals_valid_slice2+nreals_valid_slice3,
-                                            bx, slice_fab4.nComp());
+        auto const buf = amrex::makeArray4(
+            m_fields_recv_buffer, bx, ncomp2 + ncomp3 + ncomp4);
         MPI_Status status;
         MPI_Recv(m_fields_recv_buffer, nreals_total,
                  amrex::ParallelDescriptor::Mpi_typemap<amrex::Real>::type(),
                  m_rank_z+1, comm_z_tag, m_comm_z, &status);
         amrex::ParallelFor
-            (bx, slice_fab2.nComp(), [=] AMREX_GPU_DEVICE (int i, int j, int k, int n) noexcept
+            (bx, 2, [=] AMREX_GPU_DEVICE (int i, int j, int k, int n) noexcept
+            {
+                slice_fab2(i,j,k,FieldComps::Bx+n) = 0.; // buf(i,j,k,n);
+            });
+        amrex::ParallelFor
+            (bx, 2, [=] AMREX_GPU_DEVICE (int i, int j, int k, int n) noexcept
+            {
+                slice_fab2(i,j,k,FieldComps::jx+n) = 0.; // buf(i,j,k,n+2);
+            });
+        amrex::ParallelFor
+            (bx, 2, [=] AMREX_GPU_DEVICE (int i, int j, int k, int n) noexcept
+            {
+                slice_fab3(i,j,k,FieldComps::Bx+n) = 0.; // buf(i,j,k,n+4);
+            });
+        amrex::ParallelFor
+            (bx, 1, [=] AMREX_GPU_DEVICE (int i, int j, int k, int n) noexcept
+            {
+                slice_fab4(i,j,k,FieldComps::rho) = 1.e2; // buf(i,j,k,6);
+            });
+/*
+        amrex::ParallelFor
+            (bx, 1, [=] AMREX_GPU_DEVICE (int i, int j, int k, int n) noexcept
              {
-                 slice_fab2(i,j,k,n) = buf2(i,j,k,n);
-             },
-             bx, slice_fab3.nComp(), [=] AMREX_GPU_DEVICE (int i, int j, int k, int n) noexcept
-             {
-                 slice_fab3(i,j,k,n) = buf3(i,j,k,n);
-             },
-             bx, slice_fab4.nComp(), [=] AMREX_GPU_DEVICE (int i, int j, int k, int n) noexcept
-             {
-                 slice_fab4(i,j,k,n) = buf4(i,j,k,n);
+                 slice_fab2(i,j,k,FieldComps::Bx) = buf(i,j,k,0);
+                 slice_fab2(i,j,k,FieldComps::By) = buf(i,j,k,1);
+                 slice_fab2(i,j,k,FieldComps::jx) = buf(i,j,k,2);
+                 slice_fab2(i,j,k,FieldComps::jy) = buf(i,j,k,3);
+                 slice_fab3(i,j,k,FieldComps::Bx) = buf(i,j,k,4);
+                 slice_fab3(i,j,k,FieldComps::By) = buf(i,j,k,5);
+                 slice_fab4(i,j,k,FieldComps::rho) = buf(i,j,k,6);
              });
-
+*/
         amrex::Gpu::Device::synchronize();
         }
 
@@ -717,31 +738,76 @@ Hipace::Notify ()
         amrex::Array4<amrex::Real const> const& slice_fab3 = slice3.array(box_index);
         amrex::Array4<amrex::Real const> const& slice_fab4 = slice4.array(box_index);
         const amrex::Box& bx = slice2.boxArray()[box_index]; // does not include ghost cells
-        const std::size_t nreals_valid_slice2 = bx.numPts()*slice_fab2.nComp();
-        const std::size_t nreals_valid_slice3 = bx.numPts()*slice_fab3.nComp();
-        const std::size_t nreals_valid_slice4 = bx.numPts()*slice_fab4.nComp();
+        constexpr int ncomp2 = 4;
+        constexpr int ncomp3 = 2;
+        constexpr int ncomp4 = 1;
+        const std::size_t nreals_valid_slice2 = bx.numPts()*ncomp2;
+        const std::size_t nreals_valid_slice3 = bx.numPts()*ncomp3;
+        const std::size_t nreals_valid_slice4 = bx.numPts()*ncomp4;
         const std::size_t nreals_total =
             nreals_valid_slice2 + nreals_valid_slice3 + nreals_valid_slice4;
-        auto const buf2 = amrex::makeArray4(m_fields_send_buffer,
-                                            bx, slice_fab2.nComp());
-        auto const buf3 = amrex::makeArray4(m_fields_send_buffer+nreals_valid_slice2,
-                                            bx, slice_fab3.nComp());
-        auto const buf4 = amrex::makeArray4(m_fields_send_buffer+nreals_valid_slice2+nreals_valid_slice3,
-                                            bx, slice_fab4.nComp());
-        amrex::ParallelFor
-            (bx, slice_fab2.nComp(), [=] AMREX_GPU_DEVICE (int i, int j, int k, int n) noexcept
-             {
-                 buf2(i,j,k,n) = slice_fab2(i,j,k,n);
-             },
-             bx, slice_fab3.nComp(), [=] AMREX_GPU_DEVICE (int i, int j, int k, int n) noexcept
-             {
-                 buf3(i,j,k,n) = slice_fab3(i,j,k,n);
-             },
-             bx, slice_fab4.nComp(), [=] AMREX_GPU_DEVICE (int i, int j, int k, int n) noexcept
-             {
-                 buf4(i,j,k,n) = slice_fab4(i,j,k,n);
-             });
+        auto const buf1 = amrex::makeArray4(
+            recv_buffer, bx, 2);
+        auto const buf2 = amrex::makeArray4(
+            recv_buffer+nreals_valid_slice2/2, bx, 2);
+        auto const buf3 = amrex::makeArray4(
+            recv_buffer+nreals_valid_slice2, bx, slice_fab3.nComp());
+        auto const buf4 = amrex::makeArray4(
+            recv_buffer+nreals_valid_slice2+nreals_valid_slice3, bx, slice_fab4.nComp());
 
+        auto const buf = amrex::makeArray4(
+            m_fields_recv_buffer, bx, ncomp2 + ncomp3 + ncomp4);
+        amrex::ParallelFor
+            (bx, 2, [=] AMREX_GPU_DEVICE (int i, int j, int k, int n) noexcept
+            {
+                buf(i,j,k,n) = slice_fab2(i,j,k,FieldComps::Bx+n);
+            });
+        amrex::ParallelFor
+            (bx, 2, [=] AMREX_GPU_DEVICE (int i, int j, int k, int n) noexcept
+            {
+                buf(i,j,k,n+2) = slice_fab2(i,j,k,FieldComps::jx+n);
+            });
+        amrex::ParallelFor
+            (bx, 2, [=] AMREX_GPU_DEVICE (int i, int j, int k, int n) noexcept
+            {
+                buf(i,j,k,n+4) = slice_fab3(i,j,k,FieldComps::Bx+n);
+            });
+        amrex::ParallelFor
+            (bx, 1, [=] AMREX_GPU_DEVICE (int i, int j, int k, int n) noexcept
+            {
+                buf(i,j,k,6) = slice_fab4(i,j,k,FieldComps::rho);
+            });
+
+
+        
+/*
+        amrex::ParallelFor
+            (bx, 2, [=] AMREX_GPU_DEVICE (int i, int j, int k, int n) noexcept
+             {
+                 buf(i,j,k,n) = slice_fab2(i,j,k,FieldComps::Bx+n);
+             }, bx, 2, [=] AMREX_GPU_DEVICE (int i, int j, int k, int n) noexcept
+             {
+                 buf(i,j,k,n+2) = slice_fab2(i,j,k,FieldComps::jx+n);
+             }, bx, 2, [=] AMREX_GPU_DEVICE (int i, int j, int k, int n) noexcept
+             {
+                 buf(i,j,k,n+4) = slice_fab3(i,j,k,FieldComps::Bx+n);
+             });
+        amrex::ParallelFor
+            (bx, 1, [=] AMREX_GPU_DEVICE (int i, int j, int k, int n) noexcept
+             {
+                 buf(i,j,k,6) = slice_fab4(i,j,k,FieldComps::rho);
+             });
+        , bx, 2, [=] AMREX_GPU_DEVICE (int i, int j, int k, int n) noexcept
+             {
+                 buf(i,j,k,0) = slice_fab2(i,j,k,FieldComps::Bx);
+                 buf(i,j,k,1) = slice_fab2(i,j,k,FieldComps::By);
+                 buf(i,j,k,2) = slice_fab2(i,j,k,FieldComps::jx);
+                 buf(i,j,k,3) = slice_fab2(i,j,k,FieldComps::jy);
+                 buf(i,j,k,4) = slice_fab3(i,j,k,FieldComps::Bx);
+                 buf(i,j,k,5) = slice_fab3(i,j,k,FieldComps::By);
+                 buf(i,j,k,6) = slice_fab4(i,j,k,FieldComps::rho);
+             });
+*/
         amrex::Gpu::Device::synchronize();
         MPI_Isend(m_fields_send_buffer, nreals_total,
                   amrex::ParallelDescriptor::Mpi_typemap<amrex::Real>::type(),
