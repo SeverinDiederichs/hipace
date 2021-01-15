@@ -215,6 +215,7 @@ Hipace::InitData ()
         const std::size_t nreals_valid_slice4 = bx.numPts()*slice_fab4.nComp();
         const std::size_t nreals_total =
             nreals_valid_slice2 + nreals_valid_slice3 + nreals_valid_slice4;
+        amrex::Print()<<"fields buffer size: "<<nreals_total<<'\n';
         m_fields_send_buffer = (amrex::Real*)amrex::The_Pinned_Arena()->alloc
             (sizeof(amrex::Real)*nreals_total);
         m_fields_recv_buffer = (amrex::Real*)amrex::The_Pinned_Arena()->alloc
@@ -224,6 +225,7 @@ Hipace::InitData ()
         const amrex::Long np = m_plasma_container.m_num_exchange;
         const amrex::Long psize = m_plasma_container.superParticleSize();
         const amrex::Long buffer_size = psize*np;
+        amrex::Print()<<"plasma buffer size: "<<buffer_size<<'\n';
         m_plasma_recv_buffer = (char*)amrex::The_Pinned_Arena()->alloc(buffer_size);
         m_plasma_send_buffer = (char*)amrex::The_Pinned_Arena()->alloc(buffer_size);
     }
@@ -691,7 +693,7 @@ Hipace::Wait ()
             }
 
             amrex::Gpu::Device::synchronize();
-            amrex::The_Pinned_Arena()->free(m_plasma_recv_buffer);
+            // amrex::The_Pinned_Arena()->free(m_plasma_recv_buffer);
         }
     }
     #ifdef HIPACE_USE_OPENPMD
