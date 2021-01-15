@@ -149,14 +149,9 @@ public:
     char* m_plasma_recv_buffer = nullptr;
 
     /** Send buffer for longitudinal parallelization (pipeline) */
-    // amrex::Real* m_send_buffer = nullptr;
+    amrex::Real* m_send_buffer = nullptr;
     /** Send buffer for particle longitudinal parallelization (pipeline) */
-    // char* m_psend_buffer = nullptr;
-
-    /** status of the send request */
-    MPI_Request m_send_request = MPI_REQUEST_NULL;
-    /** status of the particle send request */
-    MPI_Request m_psend_request = MPI_REQUEST_NULL;
+    char* m_psend_buffer = nullptr;
 
     /** All field data (3D array, slices) and field methods */
     Fields m_fields;

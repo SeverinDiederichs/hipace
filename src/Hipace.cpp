@@ -215,7 +215,6 @@ Hipace::InitData ()
         const std::size_t nreals_valid_slice4 = bx.numPts()*slice_fab4.nComp();
         const std::size_t nreals_total =
             nreals_valid_slice2 + nreals_valid_slice3 + nreals_valid_slice4;
-        amrex::Print()<<"fields buffer size: "<<nreals_total<<'\n';
         m_fields_send_buffer = (amrex::Real*)amrex::The_Pinned_Arena()->alloc
             (sizeof(amrex::Real)*nreals_total);
         m_fields_recv_buffer = (amrex::Real*)amrex::The_Pinned_Arena()->alloc
@@ -225,7 +224,6 @@ Hipace::InitData ()
         const amrex::Long np = m_plasma_container.m_num_exchange;
         const amrex::Long psize = m_plasma_container.superParticleSize();
         const amrex::Long buffer_size = psize*np;
-        amrex::Print()<<"plasma buffer size: "<<buffer_size<<'\n';
         m_plasma_recv_buffer = (char*)amrex::The_Pinned_Arena()->alloc(buffer_size);
         m_plasma_send_buffer = (char*)amrex::The_Pinned_Arena()->alloc(buffer_size);
     }
@@ -601,8 +599,8 @@ Hipace::Wait ()
         const std::size_t nreals_valid_slice4 = bx.numPts()*slice_fab4.nComp();
         const std::size_t nreals_total =
             nreals_valid_slice2 + nreals_valid_slice3 + nreals_valid_slice4;
-        //auto recv_buffer = (amrex::Real*)amrex::The_Pinned_Arena()->alloc
-        //    (sizeof(amrex::Real)*nreals_total);
+        // auto recv_buffer = (amrex::Real*)amrex::The_Pinned_Arena()->alloc
+        //     (sizeof(amrex::Real)*nreals_total);
         auto const buf2 = amrex::makeArray4(m_fields_recv_buffer,
                                             bx, slice_fab2.nComp());
         auto const buf3 = amrex::makeArray4(m_fields_recv_buffer+nreals_valid_slice2,
@@ -659,6 +657,7 @@ Hipace::Wait ()
                 int const np_per_block = 128;
                 int const nblocks = (np+np_per_block-1)/np_per_block;
                 std::size_t const shared_mem_bytes = np_per_block * psize;
+                const auto p_plasma_recv_buffer = m_plasma_recv_buffer;
                 // NOTE - TODO DPC++
                 amrex::launch(nblocks, np_per_block, shared_mem_bytes, amrex::Gpu::gpuStream(),
                 [=] AMREX_GPU_DEVICE () noexcept
@@ -666,13 +665,13 @@ Hipace::Wait ()
                     amrex::Gpu::SharedMemory<char> gsm;
                     char* const shared = gsm.dataPtr();
 
-                    // Copy packed data from recv_buffer (in pinned memory) to shared memory
+                    // Copy packed data from m_plasma_recv_buffer (in pinned memory) to shared memory
                     const int i = blockDim.x*blockIdx.x+threadIdx.x;
                     const unsigned int m = threadIdx.x;
                     const unsigned int mend = amrex::min<unsigned int>(blockDim.x, np-blockDim.x*blockIdx.x);
                     for (unsigned int index = m;
                          index < mend*psize/sizeof(double); index += blockDim.x) {
-                        const double *csrc = (double *)(m_plasma_recv_buffer+blockDim.x*blockIdx.x*psize);
+                        const double *csrc = (double *)(p_plasma_recv_buffer+blockDim.x*blockIdx.x*psize);
                         double *cdest = (double *)shared;
                         cdest[index] = csrc[index];
                     }
@@ -693,7 +692,7 @@ Hipace::Wait ()
             }
 
             amrex::Gpu::Device::synchronize();
-            // amrex::The_Pinned_Arena()->free(m_plasma_recv_buffer);
+            // amrex::The_Pinned_Arena()->free(recv_buffer);
         }
     }
     #ifdef HIPACE_USE_OPENPMD
@@ -729,8 +728,8 @@ Hipace::Notify ()
         const std::size_t nreals_valid_slice4 = bx.numPts()*slice_fab4.nComp();
         const std::size_t nreals_total =
             nreals_valid_slice2 + nreals_valid_slice3 + nreals_valid_slice4;
-        //m_send_buffer = (amrex::Real*)amrex::The_Pinned_Arena()->alloc
-        //    (sizeof(amrex::Real)*nreals_total);
+        // m_send_buffer = (amrex::Real*)amrex::The_Pinned_Arena()->alloc
+        //     (sizeof(amrex::Real)*nreals_total);
         auto const buf2 = amrex::makeArray4(m_fields_send_buffer,
                                             bx, slice_fab2.nComp());
         auto const buf3 = amrex::makeArray4(m_fields_send_buffer+nreals_valid_slice2,
@@ -809,7 +808,7 @@ Hipace::Notify ()
             {
                 for (int i = 0; i < np; ++i)
                 {
-                    ptd.packParticleData(p_psend_buffer, i, i*psize, p_comm_real, p_comm_int);
+                    ptd.packParticleData(m_plasma_send_buffer, i, i*psize, p_comm_real, p_comm_int);
                 }
             }
             amrex::Gpu::Device::synchronize();
