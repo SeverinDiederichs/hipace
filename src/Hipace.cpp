@@ -718,7 +718,7 @@ Hipace::Notify ()
         // Same thing for the plasma particles. Currently only one tile.
         {
             const int lev = 0;
-            const amrex::Long np = 1; //m_plasma_container.m_num_exchange;
+            const amrex::Long np = 1e5; //m_plasma_container.m_num_exchange;
             const amrex::Long psize = m_plasma_container.superParticleSize();
             const amrex::Long buffer_size = psize*np;
             m_psend_buffer = (char*)amrex::The_Pinned_Arena()->alloc(buffer_size);
