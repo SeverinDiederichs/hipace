@@ -128,19 +128,19 @@ AdvanceBeamParticlesSlice (BeamParticleContainer& beam, Fields& fields,
                             * ( EypBxp + ( uzp[ip] / gammap - phys_const.c ) * Bxp );
 
                 // Now computing new longitudinal momentum
-                const amrex::ParticleReal ux_intermediate = ( ux_next + uxp[ip] ) * 0.5_rt;
-                const amrex::ParticleReal uy_intermediate = ( uy_next + uyp[ip] ) * 0.5_rt;
-                const amrex::ParticleReal uz_intermediate = uzp[ip]
-                                                      + dt * 0.5_rt * charge_mass_ratio * Ezp;
+                // const amrex::ParticleReal ux_intermediate = ( ux_next + uxp[ip] ) * 0.5_rt;
+                // const amrex::ParticleReal uy_intermediate = ( uy_next + uyp[ip] ) * 0.5_rt;
+                // const amrex::ParticleReal uz_intermediate = uzp[ip]
+                //                                       + dt * 0.5_rt * charge_mass_ratio * Ezp;
+                //
+                // const amrex::ParticleReal gamma_intermediate = sqrt( 1.0_rt
+                //                         + ux_intermediate*ux_intermediate*clightsq
+                //                         + uy_intermediate*uy_intermediate*clightsq
+                //                         + uz_intermediate*uz_intermediate*clightsq );
 
-                const amrex::ParticleReal gamma_intermediate = sqrt( 1.0_rt
-                                        + ux_intermediate*ux_intermediate*clightsq
-                                        + uy_intermediate*uy_intermediate*clightsq
-                                        + uz_intermediate*uz_intermediate*clightsq );
-
-                const amrex::ParticleReal uz_next = uzp[ip] + dt * charge_mass_ratio
-                          * ( Ezp + ( ux_intermediate * Byp - uy_intermediate * Bxp )
-                              / gamma_intermediate );
+                const amrex::ParticleReal uz_next = uzp[ip]; // + dt * charge_mass_ratio
+                          // * ( Ezp + ( ux_intermediate * Byp - uy_intermediate * Bxp )
+                          //     / gamma_intermediate );
 
                 /* computing next gamma value */
                 const amrex::ParticleReal gamma_next = sqrt( 1.0_rt + uz_next*uz_next*clightsq
