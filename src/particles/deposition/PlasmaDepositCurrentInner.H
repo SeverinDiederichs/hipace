@@ -72,6 +72,7 @@ void doDepositionShapeN (const PlasmaParticleIterator& pti,
         soa.GetRealData(PlasmaIdx::uy).data() : soa.GetRealData(PlasmaIdx::uy_temp).data();
     const amrex::Real * const psip = (!temp_slice) ?
         soa.GetRealData(PlasmaIdx::psi).data() : soa.GetRealData(PlasmaIdx::psi_temp).data();
+    const amrex::Real * const const_of_motion = soa.GetRealData(PlasmaIdx::const_of_motion).data();
 
     // Extract box properties
     const amrex::Real dxi = 1.0/dx[0];
@@ -115,13 +116,13 @@ void doDepositionShapeN (const PlasmaParticleIterator& pti,
                 phys_const.q_e / (phys_const.m_e * phys_const.c * phys_const.c);
 
             // calculate 1/gamma for plasma particles
-            const amrex::Real gaminv = (2.0_rt * (psi+1.0_rt) ) /(1.0_rt
+            const amrex::Real gaminv = (2.0_rt * (psi+const_of_motion[ip]) ) /(1.0_rt
                                                                   + uxp[ip]*uxp[ip]*clightsq
                                                                   + uyp[ip]*uyp[ip]*clightsq
-                                                                  + (psi+1.0_rt)*(psi+1.0_rt));
+                                                                  + (psi+const_of_motion[ip])*(psi+const_of_motion[ip]));
 
-            if (( 1.0_rt/(gaminv*(psi+1.0_rt)) < 0.0_rt) ||
-                 ( 1.0_rt/(gaminv*(psi+1.0_rt)) > max_qsa_weighting_factor))
+            if (( 1.0_rt/(gaminv*(psi+const_of_motion[ip])) < 0.0_rt) ||
+                 ( 1.0_rt/(gaminv*(psi+const_of_motion[ip])) > max_qsa_weighting_factor))
             {
                  // This particle violates the QSA, discard it and do not deposit its current
                  amrex::Gpu::Atomic::Add(p_n_qsa_violation, 1);
@@ -131,10 +132,10 @@ void doDepositionShapeN (const PlasmaParticleIterator& pti,
             // calculate plasma particle velocities
             const amrex::Real vx = uxp[ip]*gaminv;
             const amrex::Real vy = uyp[ip]*gaminv;
-            const amrex::Real vz = phys_const.c*(1.0_rt -(psi + 1.0_rt)*gaminv);
+            const amrex::Real vz = phys_const.c*(1.0_rt -(psi + const_of_motion[ip])*gaminv);
 
             // calculate charge of the plasma particles
-            const amrex::Real wq = q*wp[ip]/(gaminv * (psi + 1.0_rt))*invvol;
+            const amrex::Real wq = q*wp[ip]/(gaminv * (psi + const_of_motion[ip]))*invvol;
 
             // wqx, wqy wqz are particle current in each direction
             const amrex::Real wqx = wq*vx;

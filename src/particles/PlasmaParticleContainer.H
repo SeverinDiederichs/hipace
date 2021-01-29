@@ -22,6 +22,7 @@ struct PlasmaIdx
         Fuy1, Fuy2, Fuy3, Fuy4, Fuy5,        //
         Fpsi1, Fpsi2, Fpsi3, Fpsi4, Fpsi5,   //
         x0, y0,                              // initial positions
+        const_of_motion,                     // inital constant of motion (= 1 for a cold plasma)
         nattribs
     };
 };

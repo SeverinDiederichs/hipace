@@ -8,6 +8,7 @@
  * \param[in] uxp momentum in x direction
  * \param[in] uyp momentum in y direction
  * \param[in] psip plasma pseudo-potential
+ * \param[in] const_of_motionp constant of motion
  * \param[in] ExmByp ExmBy field at particle position
  * \param[in] EypBxp EypBx field at particle position
  * \param[in] Ezp Ez field at particle position
@@ -26,6 +27,7 @@ AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
 void UpdateForceTerms(const amrex::ParticleReal& uxp,
                       const amrex::ParticleReal& uyp,
                       const amrex::ParticleReal& psip,
+                      const amrex::ParticleReal& const_of_motionp,
                       const amrex::ParticleReal& ExmByp,
                       const amrex::ParticleReal& EypBxp,
                       const amrex::ParticleReal& Ezp,
@@ -45,21 +47,21 @@ void UpdateForceTerms(const amrex::ParticleReal& uxp,
 
     const amrex::Real gammap = (1.0_rt + uxp*uxp*clightsq
                                        + uyp*uyp*clightsq
-                                       + (psip+1.0_rt)*(psip+1.0_rt))/(2.0_rt * (psip + 1.0_rt) );
+                                       + (psip+const_of_motionp)*(psip+const_of_motionp))/(2.0_rt * (psip + const_of_motionp) );
 
     const amrex::Real charge_mass_ratio = -1.0_rt;
     /* Change for x-position along zeta */
-    Fx1 = -uxp / (psip + 1.0_rt) / phys_const.c;
+    Fx1 = -uxp / (psip + const_of_motionp) / phys_const.c;
     /* Change for y-position along zeta */
-    Fy1 = -uyp / (psip + 1.0_rt) / phys_const.c;
+    Fy1 = -uyp / (psip + const_of_motionp) / phys_const.c;
     /* Change for ux along zeta */
-    Fux1 = - phys_const.q_e / phys_const.c / phys_const.m_e * charge_mass_ratio * ( gammap * ExmByp / (psip + 1.0_rt) + phys_const.c * Byp + ( uyp * Bzp )
-            / (psip + 1.0_rt) );
+    Fux1 = - phys_const.q_e / phys_const.c / phys_const.m_e * charge_mass_ratio * ( gammap * ExmByp / (psip + const_of_motionp) + phys_const.c * Byp + ( uyp * Bzp )
+            / (psip + const_of_motionp) );
     /* Change for uy along zeta */
-    Fuy1 = -phys_const.q_e / phys_const.c / phys_const.m_e * charge_mass_ratio * ( gammap * EypBxp / (psip + 1.0_rt) - phys_const.c * Bxp - ( uxp * Bzp )
-            / (psip + 1.0_rt) );
+    Fuy1 = -phys_const.q_e / phys_const.c / phys_const.m_e * charge_mass_ratio * ( gammap * EypBxp / (psip + const_of_motionp) - phys_const.c * Bxp - ( uxp * Bzp )
+            / (psip + const_of_motionp) );
     /* Change for psi along zeta */
-    Fpsi1 = -charge_mass_ratio * (1.0_rt / phys_const.c * ( uxp * ExmByp + uyp * EypBxp ) / (psip + 1.0_rt) - Ezp );
+    Fpsi1 = -charge_mass_ratio * (1.0_rt / phys_const.c * ( uxp * ExmByp + uyp * EypBxp ) / (psip + const_of_motionp) - Ezp );
 
 }
 

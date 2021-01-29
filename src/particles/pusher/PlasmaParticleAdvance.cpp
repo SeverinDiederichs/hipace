@@ -66,6 +66,8 @@ AdvancePlasmaParticles (PlasmaParticleContainer& plasma, Fields & fields,
         amrex::Real * const uxp = soa.GetRealData(PlasmaIdx::ux).data();
         amrex::Real * const uyp = soa.GetRealData(PlasmaIdx::uy).data();
         amrex::Real * const psip = soa.GetRealData(PlasmaIdx::psi).data();
+        const amrex::Real * const const_of_motionp = soa.GetRealData(
+                                                            PlasmaIdx::const_of_motion).data();
         amrex::Real * const wp = soa.GetRealData(PlasmaIdx::w).data();
 
         amrex::Real * const x_prev = soa.GetRealData(PlasmaIdx::x_prev).data();
@@ -138,9 +140,9 @@ AdvancePlasmaParticles (PlasmaParticleContainer& plasma, Fields & fields,
                                    dx_arr, xyzmin_arr, lo, depos_order_xy, 0);
                     // update force terms for a single particle
                     const amrex::Real psi_factor = phys_const.q_e/(phys_const.m_e*phys_const.c*phys_const.c);
-                    UpdateForceTerms(uxp[ip], uyp[ip], psi_factor*psip[ip], ExmByp, EypBxp, Ezp,
-                                     Bxp, Byp, Bzp, Fx1[ip], Fy1[ip], Fux1[ip], Fuy1[ip],
-                                     Fpsi1[ip], clightsq, phys_const);
+                    UpdateForceTerms(uxp[ip], uyp[ip], psi_factor*psip[ip], const_of_motionp[ip],
+                                     ExmByp, EypBxp, Ezp, Bxp, Byp, Bzp, Fx1[ip], Fy1[ip], Fux1[ip],
+                                     Fuy1[ip], Fpsi1[ip], clightsq, phys_const);
                 }
 
                 if (do_push)
@@ -175,6 +177,7 @@ ResetPlasmaParticles (PlasmaParticleContainer& plasma, int const lev, const bool
         amrex::Real * const uxp = soa.GetRealData(PlasmaIdx::ux).data();
         amrex::Real * const uyp = soa.GetRealData(PlasmaIdx::uy).data();
         amrex::Real * const psip = soa.GetRealData(PlasmaIdx::psi).data();
+        amrex::Real * const const_of_motionp = soa.GetRealData(PlasmaIdx::const_of_motion).data();
         amrex::Real * const x_prev = soa.GetRealData(PlasmaIdx::x_prev).data();
         amrex::Real * const y_prev = soa.GetRealData(PlasmaIdx::y_prev).data();
         amrex::Real * const ux_temp = soa.GetRealData(PlasmaIdx::ux_temp).data();
