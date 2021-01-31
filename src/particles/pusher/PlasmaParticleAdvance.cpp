@@ -9,6 +9,7 @@
 #include "Hipace.H"
 #include "GetAndSetPosition.H"
 #include "utils/HipaceProfilerWrapper.H"
+#include "particles/ParticleUtil.H"
 
 void
 AdvancePlasmaParticles (PlasmaParticleContainer& plasma, Fields & fields,
@@ -169,7 +170,10 @@ ResetPlasmaParticles (PlasmaParticleContainer& plasma, int const lev, const bool
     HIPACE_PROFILE("ResetPlasmaParticles()");
 
     using namespace amrex::literals;
+    const PhysConst phys_const = get_phys_const();
 
+    const amrex::RealVect u_mean = plasma.get_u_mean();
+    const amrex::RealVect u_std = plasma.get_u_std();
     // Loop over particle boxes
     for (PlasmaParticleIterator pti(plasma, lev); pti.isValid(); ++pti)
     {
@@ -226,10 +230,14 @@ ResetPlasmaParticles (PlasmaParticleContainer& plasma, int const lev, const bool
                 if (initial == false){
                     SetPosition(ip, x_prev[ip], y_prev[ip], zp);
                 } else {
+
+                    amrex::Real u[3] = {0.,0.,0.};
+                    ParticleUtil::get_gaussian_random_momentum(u, u_mean, u_std);
+
                     SetPosition(ip, x0[ip], y0[ip], zp);
                     w[ip] = w0[ip];
-                    uxp[ip] = 0._rt;
-                    uyp[ip] = 0._rt;
+                    uxp[ip] = u[0]*phys_const.c;
+                    uyp[ip] = u[1]*phys_const.c;
                     psip[ip] = 0._rt;
                     x_prev[ip] = 0._rt;
                     y_prev[ip] = 0._rt;
@@ -261,6 +269,10 @@ ResetPlasmaParticles (PlasmaParticleContainer& plasma, int const lev, const bool
                     Fux5[ip] = 0._rt;
                     Fuy5[ip] = 0._rt;
                     Fpsi5[ip] = 0._rt;
+                    const_of_motionp[ip] = sqrt( 1 + (u[0]*phys_const.c)*(u[0]*phys_const.c)
+                                                   + (u[1]*phys_const.c)*(u[1]*phys_const.c)
+                                                   + (u[2]*phys_const.c)*(u[2]*phys_const.c))
+                                                   - (u[2]*phys_const.c);
                 }
         }
         );

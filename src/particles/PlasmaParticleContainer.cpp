@@ -1,6 +1,7 @@
 #include "PlasmaParticleContainer.H"
 #include "Hipace.H"
 #include "utils/HipaceProfilerWrapper.H"
+#include "utils/Constants.H"
 
 PlasmaParticleContainer::PlasmaParticleContainer (amrex::AmrCore* amr_core)
     : amrex::ParticleContainer<0,0,PlasmaIdx::nattribs>(amr_core->GetParGDB())
@@ -21,9 +22,24 @@ PlasmaParticleContainer::PlasmaParticleContainer (amrex::AmrCore* amr_core)
             m_u_mean[idim] = loc_array[idim];
         }
     }
-    if (pp.query("u_std", loc_array)) {
+    bool thermal_momentum_is_specified = pp.query("u_std", loc_array);
+    bool temperature_is_specified = pp.query("temperature_in_ev", m_temperature_in_ev);
+    if (thermal_momentum_is_specified) {
+        AMREX_ALWAYS_ASSERT_WITH_MESSAGE( temperature_is_specified == 0,
+            "Please specify exlusively either a temperature or the thermal momentum");
         for (int idim=0; idim < AMREX_SPACEDIM; ++idim) {
             m_u_std[idim] = loc_array[idim];
+        }
+    }
+
+    if (temperature_is_specified) {
+        AMREX_ALWAYS_ASSERT_WITH_MESSAGE( thermal_momentum_is_specified == 0,
+            "Please specify exlusively either a temperature or the thermal momentum");
+        const PhysConst phys_const_SI = make_constants_SI();
+        for (int idim=0; idim < AMREX_SPACEDIM; ++idim) {
+            m_u_std[idim] = sqrt( (m_temperature_in_ev * phys_const_SI.q_e)
+                                /(phys_const_SI.m_e * phys_const_SI.c * phys_const_SI.c ) );
+            amrex::Print() << "m_u_std " << m_u_std[idim] << "\n";
         }
     }
 }

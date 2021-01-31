@@ -60,6 +60,12 @@ public:
      */
     void RedistributeSlice (int const lev);
 
+    /** returns u_mean of the plasma distribution */
+    amrex::RealVect get_u_mean () const {return m_u_mean;};
+
+    /** returns u_std of the plasma distribution */
+    amrex::RealVect get_u_std () const {return m_u_std;};
+
     amrex::Real m_density {0}; /**< Density of the plasma */
     /** maximum weighting factor gamma/(Psi +1) before particle is regarded as violating
      *  the quasi-static approximation and is removed */
@@ -68,6 +74,7 @@ public:
     amrex::IntVect m_ppc {0,0,1}; /**< Number of particles per cell in each direction */
     amrex::RealVect m_u_mean {0,0,0}; /**< Avg momentum in each direction normalized by m*c */
     amrex::RealVect m_u_std {0,0,0}; /**< Thermal momentum in each direction normalized by m*c */
+    amrex::Real m_temperature_in_ev {0.}; /**< Temperature of the plasma in eV */
 
     amrex::Long m_num_exchange {0}; /** Number of particles that will be exchanged between slices*/
   };
