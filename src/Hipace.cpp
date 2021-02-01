@@ -292,7 +292,7 @@ Hipace::Evolve ()
     for (int step = m_numprocs_z - 1 - m_rank_z; step < m_max_step; step += m_numprocs_z)
     {
 #ifdef HIPACE_USE_OPENPMD
-        if (m_output_period > 0) m_openpmd_writer.InitDiagnostics();
+    if (m_output_period > 0) m_openpmd_writer.InitDiagnostics();
 #endif
         /* calculate the adaptive time step before printout, so the ranks already print their new dt */
         // m_adaptive_time_step.Calculate(m_dt, step, m_multi_beam, m_plasma_container, lev, m_comm_z);
