@@ -69,6 +69,14 @@ InitBeamFixedPPC (const amrex::IntVect& a_num_particles_per_cell,
 
     constexpr int lev = 0;
 
+    const amrex::IntVect ncells = a_geom.Domain().length();
+    amrex::Long ncells_total = (amrex::Long) ncells[0] * ncells[1] * ncells[2];
+    if ( ncells_total / Hipace::m_beam_injection_cr / Hipace::m_beam_injection_cr
+         > std::numeric_limits<int>::max() / 100 ){
+        amrex::Print()<<"WARNING: the number of cells is close to overflowing the maximum int,\n";
+        amrex::Print()<<"consider using a larger hipace.beam_injection_cr\n";
+    }
+
     // Since each box is allows to be very large, its number of cells may exceed the largest
     // int (~2.e9). To avoid this, we use a coarsened box (the coarsening ratio is cr, see below)
     // to inject particles. This is just a trick to have fewer cells, it injects the same
@@ -288,7 +296,7 @@ InitBeamFromFileHelper (std::string input_file,
                         bool coordinates_specified,
                         amrex::Array<std::string, AMREX_SPACEDIM> file_coordinates_xyz,
                         const amrex::Geometry& geom,
-                        const amrex::Real n_0)
+                        amrex::Real n_0)
 {
     HIPACE_PROFILE("BeamParticleContainer::InitParticles");
 
@@ -329,7 +337,7 @@ InitBeamFromFile (std::string input_file,
                   bool coordinates_specified,
                   amrex::Array<std::string, AMREX_SPACEDIM> file_coordinates_xyz,
                   const amrex::Geometry& geom,
-                  const amrex::Real n_0)
+                  amrex::Real n_0)
 {
     HIPACE_PROFILE("BeamParticleContainer::InitParticles");
 
@@ -455,7 +463,17 @@ InitBeamFromFile (std::string input_file,
     const PhysConst phys_const_SI = make_constants_SI();
     input_type si_to_norm_pos = (input_type)( 1. );
     input_type si_to_norm_charge = (input_type)( phys_const_SI.q_e );
+
     if(Hipace::m_normalized_units) {
+        if(n_0 == 0) {
+            if(electrons.containsAttribute("Hipace++_Plasma_Density")) {
+                n_0 = electrons.getAttribute("Hipace++_Plasma_Density").get<double>();
+            }
+            else {
+                amrex::Abort("Please specify the plasma density of the external beam "
+                             "to use it with normalized units with beam.plasma_density");
+            }
+        }
         auto dx = geom.CellSizeArray();
         double omega_p = (double)phys_const_SI.q_e * sqrt( (double)n_0 /
                                       ( (double)phys_const_SI.ep0 * (double)phys_const_SI.m_e ) );
@@ -484,7 +502,7 @@ InitBeamFromFile (std::string input_file,
         input_type file_e_m = q_q_data.get()[0] * unit_qq / (q_q_data.get()[0] * unit_mm);
         if( std::abs(file_e_m - ( phys_const_SI.q_e / phys_const_SI.m_e ) ) > 1e9) {
             amrex::Abort("Charge / Mass of Beam Particle from file "
-                         "dose not match electrons (1.7588e11)\n");
+                         "does not match electrons (1.7588e11)\n");
         }
     }
     else {
