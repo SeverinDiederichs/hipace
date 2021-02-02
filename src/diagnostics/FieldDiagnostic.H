@@ -43,7 +43,7 @@ public:
 private:
 
     /** Vector over levels, all fields */
-    amrex::Vector<amrex::MultiFab> m_F;
+    amrex::Vector<amrex::MultiFab> m_F; // FIXME: this should be amrex::Vector<amrex::FArrayBox>
     DiagType m_diag_type; /**< Type of diagnostics (xyz xz yz) */
     int m_slice_dir; /**< Slicing direction */
     int m_nfields; /**< Number of physical fields to write */

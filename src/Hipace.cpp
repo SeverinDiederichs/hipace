@@ -301,9 +301,9 @@ Hipace::Evolve ()
 
         ResetAllQuantities(lev);
 
-        // Wait();
+        // Wait(); FIXME: parallelization is removed for testing
 
-        amrex::MultiFab& fields = m_fields.getF(lev);
+        amrex::MultiFab& fields = m_fields.getF(lev); // FIXME: this is not needed anymore
 
         /* Store charge density of (immobile) ions into WhichSlice::RhoIons */
         if (m_rank_z == m_numprocs_z-1){
@@ -311,10 +311,13 @@ Hipace::Evolve ()
                            false, false, false, true, geom[lev], lev);
         }
 
+        // get full box array.
         // Loop over longitudinal boxes on this rank, from head to tail
         const amrex::Vector<int> index_array = fields.IndexArray();
-        for (auto it = index_array.rbegin(); it != index_array.rend(); ++it)
+        for (auto it = index_array.rbegin(); it != index_array.rend(); ++it) // FIXME: here, we need to loop over amrex::BoxArray
         {
+            // FIXME: use amrex::FArrayBox::resize(amrex::Box) to re-use the same memory
+            amrex::Print() << "box array " << boxArray(lev)[*it] << "\n";
             const amrex::Box& bx = boxArray(lev)[*it];
             amrex::Vector<amrex::DenseBins<BeamParticleContainer::ParticleType>> bins;
             bins = m_multi_beam.findParticlesInEachSlice(lev, *it, bx, geom[lev]);
@@ -331,6 +334,7 @@ Hipace::Evolve ()
                             " transversely. \n";
         }
 
+        // FIXME: parallelization is disabled for now
         /* Passing the adaptive time step info */
         // m_adaptive_time_step.PassTimeStepInfo(step, m_comm_z);
         // Slices have already been shifted, so send
