@@ -314,13 +314,14 @@ Hipace::Evolve ()
         // get full box array.
         // Loop over longitudinal boxes on this rank, from head to tail
         const amrex::Vector<int> index_array = fields.IndexArray();
-        for (auto it = index_array.rbegin(); it != index_array.rend(); ++it) // FIXME: here, we need to loop over amrex::BoxArray
+        // for (auto it = index_array.rbegin(); it != index_array.rend(); ++it) // FIXME: here, we need to loop over amrex::BoxArray
+        for (int it = m_numprocs_z-1; it >= 0; --it)
         {
             // FIXME: use amrex::FArrayBox::resize(amrex::Box) to re-use the same memory
-            amrex::Print() << "box array " << boxArray(lev)[*it] << "\n";
-            const amrex::Box& bx = boxArray(lev)[*it];
+            amrex::AllPrint() << "box array " << boxArray(lev)[it] << "\n";
+            const amrex::Box& bx = boxArray(lev)[it];
             amrex::Vector<amrex::DenseBins<BeamParticleContainer::ParticleType>> bins;
-            bins = m_multi_beam.findParticlesInEachSlice(lev, *it, bx, geom[lev]);
+            bins = m_multi_beam.findParticlesInEachSlice(lev, it, bx, geom[lev]);
 
             for (int isl = bx.bigEnd(Direction::z); isl >= bx.smallEnd(Direction::z); --isl){
                 SolveOneSlice(isl, lev, bins);
