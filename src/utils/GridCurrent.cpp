@@ -19,7 +19,7 @@ GridCurrent::GridCurrent ()
 
 void
 GridCurrent::DepositCurrentSlice (Fields& fields, const amrex::Geometry& geom, int const lev,
-                                  const int islice)
+                                  const int islice, int step) // FIXME remove step
 {
     HIPACE_PROFILE("GridCurrent::DepositCurrentSlice()");
     using namespace amrex::literals;
@@ -62,7 +62,7 @@ GridCurrent::DepositCurrentSlice (Fields& fields, const amrex::Geometry& geom, i
             const amrex::Real trans_pos_factor =  std::exp( -0.5_rt*(delta_x*delta_x
                                                                     + delta_y*delta_y) );
 
-            jz_arr(i, j, k) += loc_amplitude*trans_pos_factor*long_pos_factor;
+            jz_arr(i, j, k) += (step+1)*loc_amplitude*trans_pos_factor*long_pos_factor; // FIXME remove step
         });
     }
 }

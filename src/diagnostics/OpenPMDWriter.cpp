@@ -111,6 +111,7 @@ OpenPMDWriter::WriteFieldData (
         {
             amrex::FArrayBox const& fab = mf[mfi]; // note: this might include guards
             amrex::Box const data_box = mfi.validbox();  // w/o guards in all cases
+            amrex::Print()<< "IO data_box " << data_box << "\n";
             std::shared_ptr< amrex::Real const > data;
             if (mfi.validbox() == fab.box() ) {
                 data = openPMD::shareRaw( fab.dataPtr( icomp ) ); // non-owning view until flush()

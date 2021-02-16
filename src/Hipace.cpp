@@ -324,7 +324,7 @@ Hipace::Evolve ()
             //bins = m_multi_beam.findParticlesInEachSlice(lev, it, bx, geom[lev]); FIXME beam disabled
 
             for (int isl = bx.bigEnd(Direction::z); isl >= bx.smallEnd(Direction::z); --isl){
-                SolveOneSlice(isl, lev); //, bins); FIXME beam particles disabled
+                SolveOneSlice(isl, lev, step); //, bins); FIXME beam particles disabled step not needed
             };
         }
         if (amrex::ParallelDescriptor::NProcs() == 1) {
@@ -360,7 +360,7 @@ Hipace::Evolve ()
 }
 
 void
-Hipace::SolveOneSlice (int islice, int lev) // FIXME beam particles removed , amrex::Vector<amrex::DenseBins<BeamParticleContainer::ParticleType>>& bins)
+Hipace::SolveOneSlice (int islice, int lev, int step) // FIXME beam particles removed , amrex::Vector<amrex::DenseBins<BeamParticleContainer::ParticleType>>& bins) step not needed
 {
     HIPACE_PROFILE("Hipace::SolveOneSlice()");
     // Between this push and the corresponding pop at the end of this
@@ -387,7 +387,7 @@ Hipace::SolveOneSlice (int islice, int lev) // FIXME beam particles removed , am
 
     m_fields.SolvePoissonExmByAndEypBx(Geom(lev), m_comm_xy, lev);
 
-    m_grid_current.DepositCurrentSlice(m_fields, geom[lev], lev, islice);
+    m_grid_current.DepositCurrentSlice(m_fields, geom[lev], lev, islice, step);
     //m_multi_beam.DepositCurrentSlice(m_fields, geom[lev], lev, islice, bins); FIXME beam current deposition deactivated as it causes problems, even without a beam
 
     j_slice.FillBoundary(Geom(lev).periodicity());

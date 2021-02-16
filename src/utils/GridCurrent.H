@@ -29,7 +29,7 @@ public:
      */
     void
     DepositCurrentSlice (Fields& fields, const amrex::Geometry& geom, int const lev,
-                         const int islice);
+                         const int islice, int step); // FIXME remove step
 
 };
 
