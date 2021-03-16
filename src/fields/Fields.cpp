@@ -462,21 +462,31 @@ Fields::MixAndShiftBfields (const amrex::MultiFab& B_iter, amrex::MultiFab& B_pr
         weight_B_prev_iter = 0.5;
     }
 
-    /* calculating the mixed temporary B field  B_prev_iter = c*B_iter + d*B_prev_iter.
+    amrex::MultiFab B_iter_mix(getSlices(lev, WhichSlice::This).boxArray(),
+                               getSlices(lev, WhichSlice::This).DistributionMap(), 1,
+                               getSlices(lev, WhichSlice::This).nGrowVect());
+    amrex::MultiFab B_final(getSlices(lev, WhichSlice::This).boxArray(),
+                            getSlices(lev, WhichSlice::This).DistributionMap(), 1,
+                            getSlices(lev, WhichSlice::This).nGrowVect());
+    B_iter_mix.setVal(0.0);
+    B_final.setVal(0.0);
+
+    /* calculating the mixed temporary B field  B_iter_mix = c*B_iter + d*B_prev_iter.
      * This is temporarily stored in B_prev_iter just to avoid additional memory allocation.
      * B_prev_iter is overwritten at the end of this function */
     amrex::MultiFab::LinComb(
-        B_prev_iter,
-        weight_B_iter, B_iter, 0,
+        B_iter_mix, weight_B_iter, B_iter, 0,
         weight_B_prev_iter, B_prev_iter, 0,
         0, 1, 0);
 
-    /* calculating the mixed B field  B = a*B + (1-a)*B_prev_iter */
+    /* calculating the mixed B field  B_final = a*B + (1-a)*B_prev_iter */
     amrex::MultiFab::LinComb(
-        getSlices(lev, WhichSlice::This),
-        1-predcorr_B_mixing_factor, getSlices(lev, WhichSlice::This), field_comp,
-        predcorr_B_mixing_factor, B_prev_iter, 0,
-        field_comp, 1, 0);
+        B_final, 1-predcorr_B_mixing_factor, getSlices(lev, WhichSlice::This), field_comp,
+        predcorr_B_mixing_factor, B_iter_mix, 0,
+        0, 1, 0);
+
+    /* Shifting the B field from the current iteration to the previous iteration */
+    amrex::MultiFab::Copy(getSlices(lev, WhichSlice::This), B_final, 0, field_comp, 1, 0);
 
     /* Shifting the B field from the current iteration to the previous iteration */
     amrex::MultiFab::Copy(B_prev_iter, B_iter, 0, 0, 1, 0);
