@@ -136,6 +136,12 @@ public:
         return amrex::ParallelDescriptor::MyProc()==amrex::ParallelDescriptor::NProcs()-1;
     }
 
+    /** Version of the HiPACE executable
+     *
+     * @return detailed version string
+     */
+    static std::string Version ();
+
     /** Transverse MPI communicator (for transverse exchanges in 1 slice in the presence of
      * transverse parallelization)
      */
@@ -200,9 +206,17 @@ public:
     /** Maximum number of iterations in the predictor corrector loop
      */
     static int m_predcorr_max_iterations;
+    /** Average number of iterations in the predictor corrector loop
+     */
+    amrex::Real m_predcorr_avg_iterations = 0.;
+    /** Average transverse B field error in the predictor corrector loop
+     */
+    amrex::Real m_predcorr_avg_B_error = 0.;
     /** Mixing factor between the transverse B field iterations in the predictor corrector loop
      */
     static amrex::Real m_predcorr_B_mixing_factor;
+    /** Whether the beams deposit Jx and Jy */
+    static bool m_do_beam_jx_jy_deposition;
     /** Whether to call amrex::Gpu::synchronize() around all profiler region */
     static bool m_do_device_synchronize;
     /** How much the box is coarsened for beam injection, to avoid exceeding max int in cell count.
