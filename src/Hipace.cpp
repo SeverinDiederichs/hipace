@@ -530,19 +530,38 @@ Hipace::ExplicitSolveBxBy (const int lev)
                 const amrex::Real cez     =   ez(i,j,k);
                 const amrex::Real cbz     =   bz(i,j,k);
 
-                const amrex::Real nstar = cne - cjz;
+                const amrex::Real nstar = cne - cjz; // nstar = W_Denn as can be seen from Put_Chi
 
-                const amrex::Real nstar_gamma = cne * (1._rt+cpsi);
+                // const amrex::Real nstar_gamma = cne * (1._rt+cpsi);
+const amrex::Real nstar_gamma = 0.5_rt* (1._rt+cpsi)*(cjxx + cjyy + nstar) + 0.5_rt * nstar/(1._rt+cpsi);
+
+// IMPORTANT: in wandpic ExmBy = psi/dx not -psi/dx
+
+
+                    //  prev
+                    // const amrex::Real nstar_ax = 1._rt/(1._rt + cpsi) *
+                    //     (-nstar_gamma*cdx_psi/(1._rt+cpsi) - cjx*cez + cjxx*cdx_psi + cjxy*cdy_psi);
+                    // const amrex::Real nstar_ay = 1._rt/(1._rt + cpsi) *
+                    //     (-nstar_gamma*cdy_psi/(1._rt+cpsi) - cjy*cez + cjxy*cdx_psi + cjyy*cdy_psi);
 
                 const amrex::Real nstar_ax = 1._rt/(1._rt + cpsi) *
                     (-nstar_gamma*cdx_psi/(1._rt+cpsi) - cjx*cez + cjxx*cdx_psi + cjxy*cdy_psi);
-
                 const amrex::Real nstar_ay = 1._rt/(1._rt + cpsi) *
                     (-nstar_gamma*cdy_psi/(1._rt+cpsi) - cjy*cez + cjxy*cdx_psi + cjyy*cdy_psi);
+
+                    // ay = ((gamma*ccc.W_Ey-0.25*ccc.W_Pony*ccc.W_Denn)/(1+ccc.W_Psi)-ccc.W_Jy*ccc.W_Ez
+                	// 	-(ccc.W_Jyy*ccc.W_Ey+ccc.W_Jxy*ccc.W_Ex))/;
 
                 // Should only have 1 component, but not supported yet by the AMReX MG solver
                 mult(i,j,k,0) = nstar / (1._rt + cpsi);
                 mult(i,j,k,1) = nstar / (1._rt + cpsi);
+
+         //        sy = ccc.W_Jx*ccc.W_Bz/(1+ccc.W_Psi) + ay - (cyp.W_Jyy-cym.W_Jyy)*0.5/dy
+		 // -(cxp.W_Jxy-cxm.W_Jxy)*0.5/dx + ( cyp.W_Jz-cym.W_Jz + (cyp.B_Jz-cym.B_Jz)*(1-kzz)+(cypm.B_Jz-cymm.B_Jz)*kzz )*0.5/dy;
+         //
+         //         // sy, to compute Bx
+         //         s(i,j,k,0) = + cbz * cjx / (1._rt+cpsi) + nstar_ay - cdx_jxy - cdy_jyy + cdy_jz;
+
 
                 // sy, to compute Bx
                 s(i,j,k,0) = + cbz * cjx / (1._rt+cpsi) + nstar_ay - cdx_jxy - cdy_jyy + cdy_jz;
