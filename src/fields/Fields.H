@@ -30,7 +30,7 @@ static std::array<std::map<std::string, int>, 5> Comps
         {{
                 {"ExmBy", 0}, {"EypBx", 1}, {"Ez", 2}, {"Bx", 3}, {"By", 4}, {"Bz", 5}, {"jx", 6},
                 {"jy", 7}, {"jz", 8}, {"rho", 9}, {"Psi", 10}, {"jxx", 11}, {"jxy", 12},
-                {"jyy", 13}, {"beam_chi", 14}, {"N", 15}
+                {"jyy", 13}, {"plasma_jz", 14}, {"N", 15}
             }},
         /* WhichSlice::Previous1 */
         {{

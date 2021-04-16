@@ -410,10 +410,10 @@ Hipace::SolveOneSlice (int islice, int lev, const int ibox,
 
     // Modifies Bx and By in the current slice and the force terms of the plasma particles
     if (m_explicit){
-        // m_fields.AddRhoIons(lev, true);
+        m_fields.AddRhoIons(lev, true);
         ExplicitSolveBxBy(lev);
         m_multi_plasma.AdvanceParticles( m_fields, geom[lev], false, true, true, true, lev);
-        // m_fields.AddRhoIons(lev);
+        m_fields.AddRhoIons(lev);
     } else {
         PredictorCorrectorLoopToSolveBxBy(islice, lev);
     }
@@ -466,6 +466,7 @@ Hipace::ExplicitSolveBxBy (const int lev)
     const amrex::MultiFab Jxy(slicemf, amrex::make_alias, Comps[isl]["jxy"], 1);
     const amrex::MultiFab Jyy(slicemf, amrex::make_alias, Comps[isl]["jyy"], 1);
     const amrex::MultiFab Jz (slicemf, amrex::make_alias, Comps[isl]["jz" ], 1);
+        const amrex::MultiFab pJz (slicemf, amrex::make_alias, Comps[isl]["plasma_jz" ], 1);
     const amrex::MultiFab Psi(slicemf, amrex::make_alias, Comps[isl]["Psi"], 1);
     const amrex::MultiFab Bz (slicemf, amrex::make_alias, Comps[isl]["Bz" ], 1);
     const amrex::MultiFab Ez (slicemf, amrex::make_alias, Comps[isl]["Ez" ], 1);
@@ -484,6 +485,7 @@ Hipace::ExplicitSolveBxBy (const int lev)
         amrex::Array4<amrex::Real const> const & jxy = Jxy.array(mfi);
         amrex::Array4<amrex::Real const> const & jyy = Jyy.array(mfi);
         amrex::Array4<amrex::Real const> const & jz  = Jz .array(mfi);
+            amrex::Array4<amrex::Real const> const & pjz  = pJz .array(mfi);
         amrex::Array4<amrex::Real const> const & psi = Psi.array(mfi);
         amrex::Array4<amrex::Real const> const & bz  = Bz.array(mfi);
         amrex::Array4<amrex::Real const> const & ez  = Ez.array(mfi);
@@ -511,20 +513,20 @@ Hipace::ExplicitSolveBxBy (const int lev)
                 // WAND-PIC and hipace++:
                 //   n* and j are defined from ne in WAND-PIC and from rho in hipace++.
                 //   psi in hipace++ has the wrong sign, it is actually -psi.
-                const amrex::Real cne     =   rho(i,j,k);
-                const amrex::Real cjz     =   jz (i,j,k);
+                const amrex::Real cne     =   -rho(i,j,k);
+                const amrex::Real cjz     =   -pjz (i,j,k);
                 const amrex::Real cpsi    = - psi(i,j,k);
-                const amrex::Real cjx     = - jx (i,j,k);
-                const amrex::Real cjy     = - jy (i,j,k);
+                const amrex::Real cjx     =  jx (i,j,k);
+                const amrex::Real cjy     =  jy (i,j,k);
                 const amrex::Real cjxx    = - jxx(i,j,k);
                 const amrex::Real cjxy    = - jxy(i,j,k);
                 const amrex::Real cjyy    = - jyy(i,j,k);
-                const amrex::Real cdx_jxx = - dx_jxx;
-                const amrex::Real cdx_jxy = - dx_jxy;
+                const amrex::Real cdx_jxx =  dx_jxx;
+                const amrex::Real cdx_jxy =  dx_jxy;
                 const amrex::Real cdx_jz  =   dx_jz;
                 const amrex::Real cdx_psi = - dx_psi;
-                const amrex::Real cdy_jyy = - dy_jyy;
-                const amrex::Real cdy_jxy = - dy_jxy;
+                const amrex::Real cdy_jyy =  dy_jyy;
+                const amrex::Real cdy_jxy =  dy_jxy;
                 const amrex::Real cdy_jz  =   dy_jz;
                 const amrex::Real cdy_psi = - dy_psi;
                 const amrex::Real cez     =   ez(i,j,k);

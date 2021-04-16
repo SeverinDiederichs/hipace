@@ -168,9 +168,9 @@ void doDepositionShapeN (const BeamParticleContainer& ptile,
                         amrex::Gpu::Atomic::Add(
                             &jz_arr(lo.x+j_cell+ix, lo.y+k_cell+iy, z_slice),
                             sx_cell[ix]*sy_cell[iy]*sz_cell[iz]*wqz);
-                        amrex::Gpu::Atomic::Add(
-                            &rho_arr(lo.x+j_cell+ix, lo.y+k_cell+iy, z_slice),
-                            sx_cell[ix]*sy_cell[iy]*sz_cell[iz]*wq);
+                        // amrex::Gpu::Atomic::Add(
+                        //     &rho_arr(lo.x+j_cell+ix, lo.y+k_cell+iy, z_slice),
+                        //     sx_cell[ix]*sy_cell[iy]*sz_cell[iz]*wq);
 
                         // amrex::Print() << " jz " << sx_cell[ix]*sy_cell[iy]*sz_cell[iz]*wqz << " chi " << sx_cell[ix]*sy_cell[iy]*sz_cell[iz]*wq*gaminv << "\n";
                     }

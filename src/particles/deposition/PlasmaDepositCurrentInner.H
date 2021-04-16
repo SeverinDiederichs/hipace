@@ -51,6 +51,7 @@ void doDepositionShapeN (const PlasmaParticleIterator& pti,
                          amrex::FArrayBox& jx_fab,
                          amrex::FArrayBox& jy_fab,
                          amrex::FArrayBox& jz_fab,
+                         amrex::FArrayBox& pjz_fab,
                          amrex::FArrayBox& rho_fab,
                          amrex::FArrayBox& jxx_fab,
                          amrex::FArrayBox& jxy_fab,
@@ -97,6 +98,7 @@ void doDepositionShapeN (const PlasmaParticleIterator& pti,
     amrex::Array4<amrex::Real> const& jx_arr = jx_fab.array();
     amrex::Array4<amrex::Real> const& jy_arr = jy_fab.array();
     amrex::Array4<amrex::Real> const& jz_arr = jz_fab.array();
+        amrex::Array4<amrex::Real> const& pjz_arr = pjz_fab.array();
     amrex::Array4<amrex::Real> const& rho_arr = rho_fab.array();
     amrex::Array4<amrex::Real> const& jxx_arr = jxx_fab.array();
     amrex::Array4<amrex::Real> const& jxy_arr = jxy_fab.array();
@@ -203,6 +205,9 @@ void doDepositionShapeN (const PlasmaParticleIterator& pti,
                         amrex::Gpu::Atomic::Add(
                             &jyy_arr(lo.x+j_cell+ix, lo.y+k_cell+iy, z_index),
                             sx_cell[ix]*sy_cell[iy]*wqyy);
+                        amrex::Gpu::Atomic::Add(
+                            &pjz_arr(lo.x+j_cell+ix, lo.y+k_cell+iy, z_index),
+                            sx_cell[ix]*sy_cell[iy]*wqz);
                     }
                 }
             }
