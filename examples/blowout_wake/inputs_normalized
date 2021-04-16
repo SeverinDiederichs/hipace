@@ -1,9 +1,11 @@
 amr.n_cell = 256 256 256
 
 hipace.normalized_units=1
-hipace.predcorr_max_iterations = 1
-hipace.predcorr_B_mixing_factor = 0.12
-hipace.predcorr_B_error_tolerance = -1
+hipace.predcorr_max_iterations = 30
+hipace.predcorr_B_mixing_factor = 0.05
+hipace.predcorr_B_error_tolerance = 4e-2
+
+hipace.MG_tolerance_rel = 1e-10
 
 amr.blocking_factor = 2
 amr.max_level = 0
@@ -36,8 +38,8 @@ beam.position_std = 0.3 0.3 1.41
 beam.ppc = 1 1 1
 
 plasmas.names = plasma
-plasma.density = 1.
-plasma.ppc = 1 1
+plasma.density = 0.
+plasma.ppc = 0 0
 plasma.u_mean = 0.0 0.0 0.
 plasma.element = electron
 

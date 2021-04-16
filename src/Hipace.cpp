@@ -410,10 +410,10 @@ Hipace::SolveOneSlice (int islice, int lev, const int ibox,
 
     // Modifies Bx and By in the current slice and the force terms of the plasma particles
     if (m_explicit){
-        m_fields.AddRhoIons(lev, true);
+        // m_fields.AddRhoIons(lev, true);
         ExplicitSolveBxBy(lev);
         m_multi_plasma.AdvanceParticles( m_fields, geom[lev], false, true, true, true, lev);
-        m_fields.AddRhoIons(lev);
+        // m_fields.AddRhoIons(lev);
     } else {
         PredictorCorrectorLoopToSolveBxBy(islice, lev);
     }
@@ -511,7 +511,7 @@ Hipace::ExplicitSolveBxBy (const int lev)
                 // WAND-PIC and hipace++:
                 //   n* and j are defined from ne in WAND-PIC and from rho in hipace++.
                 //   psi in hipace++ has the wrong sign, it is actually -psi.
-                const amrex::Real cne     = - rho(i,j,k);
+                const amrex::Real cne     =   rho(i,j,k);
                 const amrex::Real cjz     =   jz (i,j,k);
                 const amrex::Real cpsi    = - psi(i,j,k);
                 const amrex::Real cjx     = - jx (i,j,k);
@@ -562,7 +562,7 @@ const amrex::Real nstar_gamma = 0.5_rt* (1._rt+cpsi)*(cjxx + cjyy + nstar) + 0.5
          //         // sy, to compute Bx
          //         s(i,j,k,0) = + cbz * cjx / (1._rt+cpsi) + nstar_ay - cdx_jxy - cdy_jyy + cdy_jz;
 
-
+// amrex::Print() << "  nstar / (1._rt + cpsi) " <<  nstar / (1._rt + cpsi) << " nstar_ax " << nstar_ax << " nstar_ay " << nstar_ay << " cdx_jxy " << cdx_jxy << " cdy_jxy " << cdy_jxy << " cdx_jxx " << cdx_jxx << " cdy_jyy " << cdy_jyy << " cdx_jz " << cdx_jz << " cdy_jz " << cdy_jz << "\n";
                 // sy, to compute Bx
                 s(i,j,k,0) = + cbz * cjx / (1._rt+cpsi) + nstar_ay - cdx_jxy - cdy_jyy + cdy_jz;
                 // sx, to compute By

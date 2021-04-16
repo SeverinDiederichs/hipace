@@ -39,6 +39,8 @@ DepositCurrentSlice (BeamParticleContainer& beam, Fields& fields, amrex::Geometr
     amrex::MultiFab jx(S, amrex::make_alias, Comps[WhichSlice::This]["jx"], 1);
     amrex::MultiFab jy(S, amrex::make_alias, Comps[WhichSlice::This]["jy"], 1);
     amrex::MultiFab jz(S, amrex::make_alias, Comps[WhichSlice::This]["jz"], 1);
+    amrex::MultiFab rho(S, amrex::make_alias, Comps[WhichSlice::This]["rho"], 1);
+
 
     // Extract FabArray for this box (because there is currently no transverse
     // parallelization, the index we want in the slice multifab is always 0.
@@ -46,22 +48,23 @@ DepositCurrentSlice (BeamParticleContainer& beam, Fields& fields, amrex::Geometr
     amrex::FArrayBox& jx_fab = jx[0];
     amrex::FArrayBox& jy_fab = jy[0];
     amrex::FArrayBox& jz_fab = jz[0];
+    amrex::FArrayBox& rho_fab = rho[0];
 
     // For now: fix the value of the charge
     const amrex::Real q = - phys_const.q_e;
 
     // Call deposition function in each box
     if        (Hipace::m_depos_order_xy == 0){
-        doDepositionShapeN<0, 0>( beam, jx_fab, jy_fab, jz_fab, dx, xyzmin, lo, q, islice_local,
+        doDepositionShapeN<0, 0>( beam, jx_fab, jy_fab, jz_fab, rho_fab, dx, xyzmin, lo, q, islice_local,
                                   bins, offset, do_beam_jx_jy_deposition);
     } else if (Hipace::m_depos_order_xy == 1){
-        doDepositionShapeN<1, 0>( beam, jx_fab, jy_fab, jz_fab, dx, xyzmin, lo, q, islice_local,
+        doDepositionShapeN<1, 0>( beam, jx_fab, jy_fab, jz_fab, rho_fab, dx, xyzmin, lo, q, islice_local,
                                   bins, offset, do_beam_jx_jy_deposition);
     } else if (Hipace::m_depos_order_xy == 2){
-        doDepositionShapeN<2, 0>( beam, jx_fab, jy_fab, jz_fab, dx, xyzmin, lo, q, islice_local,
+        doDepositionShapeN<2, 0>( beam, jx_fab, jy_fab, jz_fab, rho_fab, dx, xyzmin, lo, q, islice_local,
                                   bins, offset, do_beam_jx_jy_deposition);
     } else if (Hipace::m_depos_order_xy == 3){
-        doDepositionShapeN<3, 0>( beam, jx_fab, jy_fab, jz_fab, dx, xyzmin, lo, q, islice_local,
+        doDepositionShapeN<3, 0>( beam, jx_fab, jy_fab, jz_fab, rho_fab, dx, xyzmin, lo, q, islice_local,
                                   bins, offset, do_beam_jx_jy_deposition);
     } else {
         amrex::Abort("unknown deposition order");

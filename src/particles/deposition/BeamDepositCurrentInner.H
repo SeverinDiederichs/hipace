@@ -42,6 +42,7 @@ void doDepositionShapeN (const BeamParticleContainer& ptile,
                          amrex::FArrayBox& jx_fab,
                          amrex::FArrayBox& jy_fab,
                          amrex::FArrayBox& jz_fab,
+                         amrex::FArrayBox& rho_fab,
                          amrex::Real const * const AMREX_RESTRICT dx,
                          amrex::Real const * const AMREX_RESTRICT xyzmin,
                          amrex::Dim3 const lo,
@@ -78,6 +79,7 @@ void doDepositionShapeN (const BeamParticleContainer& ptile,
     amrex::Array4<amrex::Real> const& jx_arr = jx_fab.array();
     amrex::Array4<amrex::Real> const& jy_arr = jy_fab.array();
     amrex::Array4<amrex::Real> const& jz_arr = jz_fab.array();
+    amrex::Array4<amrex::Real> const& rho_arr = rho_fab.array();
 
     constexpr int CELL = amrex::IndexType::CELL;
 
@@ -166,6 +168,11 @@ void doDepositionShapeN (const BeamParticleContainer& ptile,
                         amrex::Gpu::Atomic::Add(
                             &jz_arr(lo.x+j_cell+ix, lo.y+k_cell+iy, z_slice),
                             sx_cell[ix]*sy_cell[iy]*sz_cell[iz]*wqz);
+                        amrex::Gpu::Atomic::Add(
+                            &rho_arr(lo.x+j_cell+ix, lo.y+k_cell+iy, z_slice),
+                            sx_cell[ix]*sy_cell[iy]*sz_cell[iz]*wq);
+
+                        // amrex::Print() << " jz " << sx_cell[ix]*sy_cell[iy]*sz_cell[iz]*wqz << " chi " << sx_cell[ix]*sy_cell[iy]*sz_cell[iz]*wq*gaminv << "\n";
                     }
                 }
             }
