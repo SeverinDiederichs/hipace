@@ -1,12 +1,10 @@
-amr.n_cell = 1024 1024 1024
+amr.n_cell = 8 8 16
 
 hipace.normalized_units=1
 hipace.predcorr_max_iterations = 30
 hipace.predcorr_B_mixing_factor = 0.05
 hipace.predcorr_B_error_tolerance = 4e-2
-
-hipace.MG_tolerance_rel = 1e-4
-
+hipace.MG_tolerance_rel = 1e-10
 amr.blocking_factor = 2
 amr.max_level = 0
 
@@ -20,7 +18,7 @@ hipace.depos_order_xy = 2
 
 geometry.coord_sys   = 0                  # 0: Cartesian
 geometry.is_periodic = 1     1     0      # Is periodic?
-geometry.prob_lo     = -8.   -8.   -8   # physical domain
+geometry.prob_lo     = -8.   -8.   -8    # physical domain
 geometry.prob_hi     =  8.    8.    6
 
 beams.names = beam
