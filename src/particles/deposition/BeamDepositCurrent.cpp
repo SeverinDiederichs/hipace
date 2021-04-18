@@ -51,7 +51,6 @@ DepositCurrentSlice (BeamParticleContainer& beam, Fields& fields, amrex::Geometr
     amrex::FArrayBox& jx_fab = jx[0];
     amrex::FArrayBox& jy_fab = jy[0];
     amrex::FArrayBox& jz_fab = jz[0];
-    amrex::FArrayBox& rho_fab = rho[0];
 
     // For now: fix the value of the charge
     const amrex::Real q = - phys_const.q_e;

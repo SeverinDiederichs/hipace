@@ -511,34 +511,21 @@ Hipace::ExplicitSolveBxBy (const int lev)
                 // WAND-PIC and hipace++:
                 //   n* and j are defined from ne in WAND-PIC and from rho in hipace++.
                 //   psi in hipace++ has the wrong sign, it is actually -psi.
-<<<<<<< HEAD
+
                 const amrex::Real cne     =   -rho(i,j,k);
                 const amrex::Real cjz     =   -pjz (i,j,k);
-                const amrex::Real cpsi    = - psi(i,j,k);
+                const amrex::Real cpsi    =  psi(i,j,k);
                 const amrex::Real cjx     =  jx (i,j,k);
                 const amrex::Real cjy     =  jy (i,j,k);
-=======
-                const amrex::Real cne     = - rho(i,j,k);
-                const amrex::Real cjz     =   jz (i,j,k);
-                const amrex::Real cpsi    =   psi(i,j,k);
-                const amrex::Real cjx     = - jx (i,j,k);
-                const amrex::Real cjy     = - jy (i,j,k);
->>>>>>> development
                 const amrex::Real cjxx    = - jxx(i,j,k);
                 const amrex::Real cjxy    = - jxy(i,j,k);
                 const amrex::Real cjyy    = - jyy(i,j,k);
                 const amrex::Real cdx_jxx =  dx_jxx;
                 const amrex::Real cdx_jxy =  dx_jxy;
                 const amrex::Real cdx_jz  =   dx_jz;
-<<<<<<< HEAD
-                const amrex::Real cdx_psi = - dx_psi;
+                const amrex::Real cdx_psi =  dx_psi;
                 const amrex::Real cdy_jyy =  dy_jyy;
                 const amrex::Real cdy_jxy =  dy_jxy;
-=======
-                const amrex::Real cdx_psi =   dx_psi;
-                const amrex::Real cdy_jyy = - dy_jyy;
-                const amrex::Real cdy_jxy = - dy_jxy;
->>>>>>> development
                 const amrex::Real cdy_jz  =   dy_jz;
                 const amrex::Real cdy_psi =   dy_psi;
                 const amrex::Real cez     =   ez(i,j,k);
