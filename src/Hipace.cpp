@@ -565,7 +565,7 @@ const amrex::Real nstar_gamma = 0.5_rt* (1._rt+cpsi)*(cjxx + cjyy + nstar) + 0.5
          //         s(i,j,k,0) = + cbz * cjx / (1._rt+cpsi) + nstar_ay - cdx_jxy - cdy_jyy + cdy_jz;
 
 // amrex::Print() << "  nstar / (1._rt + cpsi) " <<  nstar / (1._rt + cpsi) << " nstar_ax " << nstar_ax << " nstar_ay " << nstar_ay << " cdx_jxy " << cdx_jxy << " cdy_jxy " << cdy_jxy << " cdx_jxx " << cdx_jxx << " cdy_jyy " << cdy_jyy << " cdx_jz " << cdx_jz << " cdy_jz " << cdy_jz << "\n";
-amrex::Print() << " nstar " << nstar << " nstar_gamma " << nstar_gamma << " cdy_jz " << cdy_jz << " cdx_jz " << cdx_jz << "\n";
+amrex::Print() << "i,j,k " << i << " " << j << " " << k << " cne " << cne << " cjz " << cjz << " nstar " << nstar << " nstar_gamma " << nstar_gamma << " cdy_jz " << cdy_jz << " cdx_jz " << cdx_jz << "\n";
 
                 // sy, to compute Bx
                 s(i,j,k,0) = + cbz * cjx / (1._rt+cpsi) + nstar_ay - cdx_jxy - cdy_jyy + cdy_jz;
