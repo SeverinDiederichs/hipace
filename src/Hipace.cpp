@@ -401,7 +401,7 @@ Hipace::SolveOneSlice (int islice, int lev, const int ibox,
 
     m_grid_current.DepositCurrentSlice(m_fields, geom[lev], lev, islice);
     m_multi_beam.DepositCurrentSlice(m_fields, geom[lev], lev, islice, bx, bins, m_box_sorters,
-                                     ibox, m_do_beam_jx_jy_deposition);
+                                     ibox, m_do_beam_jx_jy_deposition, WhichSlice::This);
 
     j_slice.FillBoundary(Geom(lev).periodicity());
 
@@ -415,7 +415,7 @@ Hipace::SolveOneSlice (int islice, int lev, const int ibox,
         m_multi_plasma.AdvanceParticles( m_fields, geom[lev], false, true, true, true, lev);
         m_fields.AddRhoIons(lev);
     } else {
-        PredictorCorrectorLoopToSolveBxBy(islice, lev);
+        PredictorCorrectorLoopToSolveBxBy(islice, lev, bx, bins, ibox);
     }
 
     // Push beam particles
@@ -496,8 +496,6 @@ Hipace::ExplicitSolveBxBy (const int lev)
             bx,
             [=] AMREX_GPU_DEVICE (int i, int j, int k) noexcept
             {
-                AMREX_ASSERT(k == 0);
-
                 const amrex::Real dx_jxy = (jxy(i+1,j,k)-jxy(i-1,j,k))/(2._rt*dx);
                 const amrex::Real dx_jxx = (jxx(i+1,j,k)-jxx(i-1,j,k))/(2._rt*dx);
                 const amrex::Real dx_jz  = (jz (i+1,j,k)-jz (i-1,j,k))/(2._rt*dx);
@@ -513,22 +511,36 @@ Hipace::ExplicitSolveBxBy (const int lev)
                 // WAND-PIC and hipace++:
                 //   n* and j are defined from ne in WAND-PIC and from rho in hipace++.
                 //   psi in hipace++ has the wrong sign, it is actually -psi.
+<<<<<<< HEAD
                 const amrex::Real cne     =   -rho(i,j,k);
                 const amrex::Real cjz     =   -pjz (i,j,k);
                 const amrex::Real cpsi    = - psi(i,j,k);
                 const amrex::Real cjx     =  jx (i,j,k);
                 const amrex::Real cjy     =  jy (i,j,k);
+=======
+                const amrex::Real cne     = - rho(i,j,k);
+                const amrex::Real cjz     =   jz (i,j,k);
+                const amrex::Real cpsi    =   psi(i,j,k);
+                const amrex::Real cjx     = - jx (i,j,k);
+                const amrex::Real cjy     = - jy (i,j,k);
+>>>>>>> development
                 const amrex::Real cjxx    = - jxx(i,j,k);
                 const amrex::Real cjxy    = - jxy(i,j,k);
                 const amrex::Real cjyy    = - jyy(i,j,k);
                 const amrex::Real cdx_jxx =  dx_jxx;
                 const amrex::Real cdx_jxy =  dx_jxy;
                 const amrex::Real cdx_jz  =   dx_jz;
+<<<<<<< HEAD
                 const amrex::Real cdx_psi = - dx_psi;
                 const amrex::Real cdy_jyy =  dy_jyy;
                 const amrex::Real cdy_jxy =  dy_jxy;
+=======
+                const amrex::Real cdx_psi =   dx_psi;
+                const amrex::Real cdy_jyy = - dy_jyy;
+                const amrex::Real cdy_jxy = - dy_jxy;
+>>>>>>> development
                 const amrex::Real cdy_jz  =   dy_jz;
-                const amrex::Real cdy_psi = - dy_psi;
+                const amrex::Real cdy_psi =   dy_psi;
                 const amrex::Real cez     =   ez(i,j,k);
                 const amrex::Real cbz     =   bz(i,j,k);
 
@@ -623,7 +635,9 @@ amrex::Print() << "i,j,k " << i << " " << j << " " << k << " cne " << cne << " c
 }
 
 void
-Hipace::PredictorCorrectorLoopToSolveBxBy (const int islice, const int lev)
+Hipace::PredictorCorrectorLoopToSolveBxBy (const int islice, const int lev, const amrex::Box bx,
+                        amrex::Vector<amrex::DenseBins<BeamParticleContainer::ParticleType>> bins,
+                        const int ibox)
 {
     HIPACE_PROFILE("Hipace::PredictorCorrectorLoopToSolveBxBy()");
 
@@ -691,6 +705,9 @@ Hipace::PredictorCorrectorLoopToSolveBxBy (const int islice, const int lev)
         /* deposit current to next slice */
         m_multi_plasma.DepositCurrent(
             m_fields, WhichSlice::Next, true, true, false, false, false, geom[lev], lev);
+
+        m_multi_beam.DepositCurrentSlice(m_fields, geom[lev], lev, islice, bx, bins, m_box_sorters,
+                                         ibox, m_do_beam_jx_jy_deposition, WhichSlice::Next);
 
         amrex::ParallelContext::push(m_comm_xy);
         // need to exchange jx jy jz rho
