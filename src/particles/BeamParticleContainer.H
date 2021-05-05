@@ -60,7 +60,7 @@ public:
 
 #ifdef HIPACE_USE_OPENPMD
     /** Checks the input file first to determine its Datatype*/
-    void InitBeamFromFileHelper (const std::string input_file,
+    void InitBeamFromFileHelper (std::string input_file,
                                  const bool coordinates_specified,
                                  const amrex::Array<std::string, AMREX_SPACEDIM> file_coordinates_xyz,
                                  const amrex::Geometry& geom,

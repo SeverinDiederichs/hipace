@@ -9,6 +9,7 @@
 #include <openPMD/openPMD.hpp>
 #include <iostream> // std::cout
 #include <memory>   // std::shared_ptr
+#include <regex>
 #endif  // HIPACE_USE_OPENPMD
 
 
@@ -286,7 +287,7 @@ InitBeamFixedWeight (int num_to_add,
 #ifdef HIPACE_USE_OPENPMD
 void
 BeamParticleContainer::
-InitBeamFromFileHelper (const std::string input_file,
+InitBeamFromFileHelper (std::string input_file,
                         const bool coordinates_specified,
                         const amrex::Array<std::string, AMREX_SPACEDIM> file_coordinates_xyz,
                         const amrex::Geometry& geom,
@@ -300,16 +301,25 @@ InitBeamFromFileHelper (const std::string input_file,
     openPMD::Datatype input_type = openPMD::Datatype::INT;
     bool species_known;
     {
-        // Check what kind of Datatype is used in beam file
-        auto series = openPMD::Series( input_file , openPMD::Access::READ_ONLY );
+        openPMD::Series* series;
+        try {series = new openPMD::Series( input_file , openPMD::Access::READ_ONLY );
+            series->flush();
+        } catch(...) {
+            delete series;
+            // change eg. data_0000.h5 to data_%T.h5 (doesn't always produce valid file name)
+            std::regex reg("(\\d+)(\\.[\\w\\d]*$)");
+            input_file = std::regex_replace(input_file, reg, "%T$2");
+            series = new openPMD::Series( input_file , openPMD::Access::READ_ONLY );
+        }
 
-        if(!series.iterations.contains(num_iteration)) {
+        // Check what kind of Datatype is used in beam file
+        if(!series->iterations.contains(num_iteration)) {
             amrex::Abort("Could not find iteration " + std::to_string(num_iteration) +
                                                         " in file " + input_file + "\n");
         }
-        species_known = series.iterations[num_iteration].particles.contains(species_name);
+        species_known = series->iterations[num_iteration].particles.contains(species_name);
 
-        for( auto const& particle_type : series.iterations[num_iteration].particles ) {
+        for( auto const& particle_type : series->iterations[num_iteration].particles ) {
             if( (!species_known) || (particle_type.first == species_name) ) {
                 for( auto const& physical_quantity : particle_type.second ) {
                     if( physical_quantity.first != "id") {
@@ -325,7 +335,7 @@ InitBeamFromFileHelper (const std::string input_file,
           std::string err = "Error, the particle species name " + species_name +
                 " was not found or doss not contain any data. The input file contains the" +
                 " following particle species names:\n";
-          for( auto const& species_type : series.iterations[num_iteration].particles ) {
+          for( auto const& species_type : series->iterations[num_iteration].particles ) {
               err += species_type.first + "\n";
           }
           if( !species_specified ) {
@@ -333,7 +343,7 @@ InitBeamFromFileHelper (const std::string input_file,
           }
           amrex::Abort(err);
         }
-
+        delete series;
     }
 
     if( input_type == openPMD::Datatype::FLOAT ) {
