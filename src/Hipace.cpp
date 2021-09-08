@@ -141,6 +141,8 @@ Hipace::Hipace () :
 
 #ifdef AMREX_USE_MPI
     pph.query("skip_empty_comms", m_skip_empty_comms);
+    pph.query("np_per_block", m_np_per_block);
+    AMREX_ALWAYS_ASSERT_WITH_MESSAGE(m_np_per_block>0, "Block size must be larger than 0");
     int myproc = amrex::ParallelDescriptor::MyProc();
     m_rank_z = myproc/(m_numprocs_x*m_numprocs_y);
     MPI_Comm_split(amrex::ParallelDescriptor::Communicator(), m_rank_z, myproc, &m_comm_xy);
@@ -1039,7 +1041,9 @@ Hipace::Wait (const int step, int it, bool only_ghost)
 
 #ifdef AMREX_USE_GPU
             if (amrex::Gpu::inLaunchRegion() && np > 0) {
-                int const np_per_block = 128;
+                HIPACE_PROFILE_VAR_NS("Hipace::Wait::Unpacking_particles", unpacking_particles);
+                HIPACE_PROFILE_VAR_START(unpacking_particles);
+                int const np_per_block = m_np_per_block;
                 int const nblocks = (np+np_per_block-1)/np_per_block;
                 std::size_t const shared_mem_bytes = np_per_block * psize;
                 // NOTE - TODO DPC++
@@ -1070,6 +1074,7 @@ Hipace::Wait (const int step, int it, bool only_ghost)
                                 shared, m*psize, i+old_size, p_comm_real, p_comm_int);
                         }
                     });
+                HIPACE_PROFILE_VAR_STOP(unpacking_particles);
             } else
 #endif
             {
@@ -1186,7 +1191,9 @@ Hipace::Notify (const int step, const int it,
 
 #ifdef AMREX_USE_GPU
             if (amrex::Gpu::inLaunchRegion() && np > 0) {
-                const int np_per_block = 128;
+                HIPACE_PROFILE_VAR_NS("Hipace::Notify::Packing_particles", packing_particles);
+                HIPACE_PROFILE_VAR_START(packing_particles);
+                const int np_per_block = m_np_per_block;
                 const int nblocks = (np+np_per_block-1)/np_per_block;
                 const std::size_t shared_mem_bytes = np_per_block * psize;
                 // NOTE - TODO DPC++
@@ -1216,6 +1223,7 @@ Hipace::Notify (const int step, const int it,
                             cdest[index] = csrc[index];
                         }
                     });
+                HIPACE_PROFILE_VAR_STOP(packing_particles);
             } else
 #endif
             {

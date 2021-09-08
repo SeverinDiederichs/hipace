@@ -272,6 +272,9 @@ public:
     /** Whether to skip communications of boxes that contain no beam particles */
     int m_skip_empty_comms = false;
     bool m_explicit = false;
+    /** block size of beam particles for sending from device to shared memory and vice versa
+     */
+    int m_np_per_block = 128;
     /**
      * \brief Solve for Bx an By in slice MF using the explicit solver
      *
