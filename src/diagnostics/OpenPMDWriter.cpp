@@ -77,8 +77,10 @@ OpenPMDWriter::WriteDiagnostics (
         openPMD::Iteration iteration = m_outputSeries[lev]->iterations[output_step];
 
         if (call_type == OpenPMDWriterCallType::beams ) {
-            iteration.setTime(physical_time);
             if (lev == 0) {
+                if (it == Hipace::m_numprocs_z - 1) {
+                    iteration.setTime(physical_time);
+                }
                 WriteBeamParticleData(a_multi_beam, iteration, output_step, it, a_box_sorter_vec, geom3D[lev], beamnames, lev);
             }
             m_outputSeries[lev]->flush();

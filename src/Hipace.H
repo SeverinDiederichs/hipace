@@ -182,7 +182,7 @@ public:
     /** Number of processors in the transverse y direction */
     int m_numprocs_y = 1;
     /** Number of processors in the longitudinal z direction */
-    int m_numprocs_z = 0;
+    static int m_numprocs_z;
     /** My rank in the transverse communicator */
     int m_rank_xy = 0;
     /** My rank in the longitudinal communicator */
