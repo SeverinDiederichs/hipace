@@ -439,6 +439,7 @@ Laser::AdvanceSliceMG (const Fields& fields, const amrex::Geometry& geom, amrex:
         m_mg = std::make_unique<hpmg::MultiGrid>(slice_geom);
     }
 
+    np1j00.setVal(0.0);
     const int max_iters = 200;
     m_mg->solve2(np1j00[0], rhs_mg, acoeff_real, acoeff_imag_scalar,
                  m_MG_tolerance_rel, m_MG_tolerance_abs, max_iters, m_MG_verbose);
