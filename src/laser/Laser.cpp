@@ -440,6 +440,11 @@ Laser::AdvanceSliceMG (const Fields& fields, const amrex::Geometry& geom, amrex:
     }
 
     const int max_iters = 200;
+
+    amrex::Real rand = amrex::Random();
+    //amrex::Real factor = 1.0_rt - (rand - 0.5_rt)/100.0_rt;
+    //amrex::Print() << " random number rand " << rand << " factor " << factor << "\n";
+    np1j00.mult(1.0_rt - (rand - 0.5_rt)/100.0_rt);
     m_mg->solve2(np1j00[0], rhs_mg, acoeff_real, acoeff_imag_scalar,
                  m_MG_tolerance_rel, m_MG_tolerance_abs, max_iters, m_MG_verbose);
 }
