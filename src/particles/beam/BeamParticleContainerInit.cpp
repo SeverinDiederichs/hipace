@@ -74,7 +74,7 @@ InitBeamFixedPPC (const amrex::IntVect& a_num_particles_per_cell,
     HIPACE_PROFILE("BeamParticleContainer::InitParticles()");
 
     if (!Hipace::HeadRank()) { return; }
-
+ 
     const amrex::IntVect ncells = a_geom.Domain().length();
     amrex::Long ncells_total = (amrex::Long) ncells[0] * ncells[1] * ncells[2];
     if ( ncells_total / Hipace::m_beam_injection_cr / Hipace::m_beam_injection_cr

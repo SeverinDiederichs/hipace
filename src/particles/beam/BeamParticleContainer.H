@@ -54,8 +54,8 @@ using BeamTileInit = amrex::ParticleTile<
             BeamIdx::int_nattribs_in_buffer
         >,
         BeamIdx::real_nattribs_in_buffer,
-        BeamIdx::int_nattribs_in_buffer /*,
-        amrex::PinnedArenaAllocator*/
+        BeamIdx::int_nattribs_in_buffer,
+        amrex::PinnedArenaAllocator
     >;
 
 /** \brief Container for particles of 1 beam species. */
@@ -180,7 +180,8 @@ public:
     }
 
     void intializeSlice(int slice, int which_slice);
-
+    /** Whether to reset the global ID incrementor to 1 before initializing this beam */
+    bool m_do_reset_id_init {false};
     unsigned long long getTotalNumParticles () const {
         return m_total_num_particles;
     }
